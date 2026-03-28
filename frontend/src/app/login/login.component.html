@@ -1,27 +1,48 @@
-<div class="auth-container">
-    <h2>Login</h2>
-    <p *ngIf="message" class="message">{{ message }}</p>
-  
-    <form (ngSubmit)="handleSubmit()">
-
-      <input
-        type="email"
-        placeholder="Email ..."
-        [(ngModel)]="formData.email"
-        name="email"
-        required
-      />
-      <input
-        type="password"
-        placeholder="Psssword ..."
-        [(ngModel)]="formData.password"
-        name="password"
-        required
-      />
-
-  
-      <button type="submit">Login</button>
-    </form>
-    <p>Don't have an account?<a routerLink="/register" routerLinkActive="router-link-active" >Register</a></p>
+<div class="auth-split">
+  <div class="auth-visual">
+    <div class="auth-visual-inner">
+      <span class="auth-logo">IMS</span>
+      <h1>Inventory Management System</h1>
+      <p>Sign in to track stock, purchases, and sales in one place.</p>
+    </div>
   </div>
-  
+  <div class="auth-panel">
+    <div class="auth-card ims-card">
+      <h2 class="auth-title">Welcome back</h2>
+      <p *ngIf="message" class="ims-toast ims-error">{{ message }}</p>
+      <form (ngSubmit)="handleSubmit()" class="auth-form">
+        <div>
+          <label class="ims-label" for="login-email">Email</label>
+          <input
+            id="login-email"
+            class="ims-input"
+            type="email"
+            placeholder="you@company.com"
+            [(ngModel)]="formData.email"
+            name="email"
+            autocomplete="username"
+            required
+          />
+        </div>
+        <div>
+          <label class="ims-label" for="login-pass">Password</label>
+          <input
+            id="login-pass"
+            class="ims-input"
+            type="password"
+            placeholder="••••••••"
+            [(ngModel)]="formData.password"
+            name="password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+        <button type="submit" class="ims-btn ims-btn-primary auth-submit">Sign in</button>
+      </form>
+      <p class="auth-footer">
+        No account?
+        <a routerLink="/register">Create one</a>
+      </p>
+    </div>
+  </div>
+</div>

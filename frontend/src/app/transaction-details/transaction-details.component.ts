@@ -38,8 +38,10 @@ export class TransactionDetailsComponent implements OnInit {
         next:(transactionData: any) =>{
           if (transactionData.status === 200) {
             this.transaction = transactionData.transaction;
-            if (this.transaction?.prouct?.imageUrl && !this.transaction.prouct.imageUrl.startsWith('/') && !this.transaction.prouct.imageUrl.startsWith('http')) {
-              this.transaction.prouct.imageUrl = '/' + this.transaction.prouct.imageUrl;
+            const img = this.transaction?.product?.imageUrl;
+            const resolved = ApiService.resolvePublicAsset(img);
+            if (resolved && this.transaction?.product) {
+              this.transaction.product.imageUrl = resolved;
             }
             this.status = this.transaction.status;
           }

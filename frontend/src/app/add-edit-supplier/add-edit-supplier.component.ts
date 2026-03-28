@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ApiService } from '../service/api.service';
 
 @Component({
@@ -12,7 +12,11 @@ import { ApiService } from '../service/api.service';
   styleUrl: './add-edit-supplier.component.css',
 })
 export class AddEditSupplierComponent implements OnInit {
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(
+    private apiService: ApiService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
   message: string = '';
   isEditing: boolean = false;
   supplierId: string | null = null;
@@ -23,11 +27,14 @@ export class AddEditSupplierComponent implements OnInit {
   };
 
   ngOnInit(): void {
-    this.supplierId = this.router.url.split('/')[2]; //extracting supplier id from url
-    if (this.supplierId) {
-      this.isEditing = true;
-      this.fetchSupplier();
-    }
+    this.route.paramMap.subscribe((pm) => {
+      const id = pm.get('supplierId');
+      if (id) {
+        this.supplierId = id;
+        this.isEditing = true;
+        this.fetchSupplier();
+      }
+    });
   }
 
   fetchSupplier(): void {
@@ -52,8 +59,8 @@ export class AddEditSupplierComponent implements OnInit {
 
   // HANDLE FORM SUBMISSION
   handleSubmit() {
-    if (!this.formData.name || !this.formData.address) {
-      this.showMessage('All fields are nessary');
+    if (!this.formData.name?.trim()) {
+      this.showMessage('Supplier name is required');
       return;
     }
 

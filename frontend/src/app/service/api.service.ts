@@ -14,7 +14,18 @@ export class ApiService {
 
   authStatuschanged = new EventEmitter<void>();
   private static BASE_URL = 'http://localhost:5050/api';
+  /** Use for static files served by Spring (e.g. {@code /products/...} uploads). */
+  static readonly API_ORIGIN = 'http://localhost:5050';
   private static ENCRYPTION_KEY = "phegon-dev-inventory";
+
+  /** Absolute URL for product images when the API stores paths like {@code products/uuid.png}. */
+  static resolvePublicAsset(path: string | null | undefined): string | undefined {
+    if (!path) return undefined;
+    const p = String(path).trim();
+    if (!p || p.startsWith('http') || p.startsWith('data:')) return p;
+    const slash = p.startsWith('/') ? p : '/' + p;
+    return `${ApiService.API_ORIGIN}${slash}`;
+  }
 
 
   constructor(private http: HttpClient) {}
@@ -69,6 +80,18 @@ export class ApiService {
 
   getLoggedInUserInfo(): Observable<any> {
     return this.http.get(`${ApiService.BASE_URL}/users/current`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  updateUser(id: string | number, body: any): Observable<any> {
+    return this.http.put(`${ApiService.BASE_URL}/users/update/${id}`, body, {
+      headers: this.getHeader(),
+    });
+  }
+
+  getDashboardSummary(): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/dashboard/summary`, {
       headers: this.getHeader(),
     });
   }
@@ -218,15 +241,43 @@ export class ApiService {
     });
   }
 
-  getAllTransactions(searchText: string): Observable<any> {
+  getAllTransactions(
+    searchText: string,
+    page: number = 0,
+    size: number = 10,
+    transactionType?: string
+  ): Observable<any> {
+    const params: Record<string, string | number> = {
+      searchText: searchText ?? '',
+      page,
+      size,
+    };
+    if (transactionType) {
+      params['transactionType'] = transactionType;
+    }
     return this.http.get(`${ApiService.BASE_URL}/transactions/all`, {
-      params: { searchText: searchText },
+      params,
       headers: this.getHeader(),
     });
   }
 
   getTransactionById(id: string): Observable<any> {
     return this.http.get(`${ApiService.BASE_URL}/transactions/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  getTransactionAnalytics(
+    month?: number,
+    year?: number
+  ): Observable<any> {
+    const params: Record<string, number> = {};
+    if (month != null && year != null) {
+      params['month'] = month;
+      params['year'] = year;
+    }
+    return this.http.get(`${ApiService.BASE_URL}/transactions/analytics`, {
+      params: Object.keys(params).length ? params : undefined,
       headers: this.getHeader(),
     });
   }

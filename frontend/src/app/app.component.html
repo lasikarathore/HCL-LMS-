@@ -1,24 +1,43 @@
-<div class="dashboard-layout">
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <h1 class="ims">IMS</h1>
-    <ul class="nav-links">
-      <li *ngIf="isAuth()"><a routerLink="/dashboard">Dashbaord</a></li>
-      <li *ngIf="isAuth()"><a routerLink="/transaction">Transactions</a></li>
-      <li *ngIf="isAdmin()"><a routerLink="/category">Category</a></li>
-      <li *ngIf="isAdmin()"><a routerLink="/product">Product</a></li>
-      <li *ngIf="isAdmin()"><a routerLink="/supplier">Supplier</a></li>
-      <li *ngIf="isAuth()"><a routerLink="/purchase">Purchase</a></li>
-      <li *ngIf="isAuth()"><a routerLink="/sell">Sell</a></li>
-      <li *ngIf="isAuth()"><a routerLink="/profile">Profile</a></li>
-      <li *ngIf="!isAuth()"><a routerLink="/login">Login</a></li>
-      <li *ngIf="!isAuth()"><a routerLink="/register">Register</a></li>
-      <li *ngIf="isAuth()"><a (click)="logOut()" >Logout</a></li>
-    </ul>
+<ng-container *ngIf="shellVisible; else authLayout">
+  <div class="ims-app-shell">
+    <aside class="ims-sidebar">
+      <div class="ims-sidebar-brand">
+        <span class="ims-logo">IMS</span>
+        <span class="ims-logo-tag">Inventory</span>
+      </div>
+      <nav class="ims-nav">
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          >Dashboard</a
+        >
+        <a routerLink="/product" routerLinkActive="active" *ngIf="isAdmin()"
+          >Products</a
+        >
+        <a routerLink="/category" routerLinkActive="active" *ngIf="isAdmin()"
+          >Categories</a
+        >
+        <a routerLink="/supplier" routerLinkActive="active" *ngIf="isAdmin()"
+          >Suppliers</a
+        >
+        <a routerLink="/purchase" routerLinkActive="active">Purchase</a>
+        <a routerLink="/sell" routerLinkActive="active">Sell</a>
+        <a routerLink="/transaction" routerLinkActive="active">Transactions</a>
+        <a routerLink="/profile" routerLinkActive="active">Profile</a>
+      </nav>
+      <div class="ims-sidebar-footer">
+        <button type="button" class="ims-logout" (click)="logOut()">
+          Sign out
+        </button>
+      </div>
+    </aside>
+    <main class="ims-main">
+      <router-outlet />
+    </main>
   </div>
+</ng-container>
 
-  <!-- MAIN CONTENT Area-->
-   <div class="main-content">
-      <router-outlet></router-outlet>
-   </div>
-</div>
+<ng-template #authLayout>
+  <router-outlet />
+</ng-template>

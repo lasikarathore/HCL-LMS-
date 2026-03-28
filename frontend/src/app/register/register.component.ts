@@ -20,7 +20,8 @@ export class RegisterComponent {
     email: '',
     name: '',
     phoneNumber: '',
-    password: ''
+    password: '',
+    role: 'MANAGER',
   };
   message:string | null = null;
 

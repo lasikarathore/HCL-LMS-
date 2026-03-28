@@ -8,84 +8,105 @@ import { ApiService } from '../service/api.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './sell.component.html',
-  styleUrl: './sell.component.css'
+  styleUrl: './sell.component.css',
 })
 export class SellComponent implements OnInit {
+  constructor(private apiService: ApiService) {}
 
-  constructor(private apiService: ApiService){}
-
-
-  products: any[] = []
-  productId:string = ''
-  description:string = ''
-  quantity:string = ''
-  message:string = ''
-
-
+  products: any[] = [];
+  productId = '';
+  description = '';
+  quantity = '';
+  message = '';
+  recentSales: any[] = [];
 
   ngOnInit(): void {
     this.fetchProducts();
+    this.loadRecentSales();
   }
 
-  fetchProducts():void{
+  get lineTotal(): number {
+    const p = this.products.find(
+      (x) => String(x.id) === String(this.productId)
+    );
+    const q = parseInt(this.quantity, 10);
+    if (!p || Number.isNaN(q) || q < 1) {
+      return 0;
+    }
+    return Number(p.price) * q;
+  }
+
+  loadRecentSales(): void {
+    this.apiService.getAllTransactions('', 0, 10, 'SALE').subscribe({
+      next: (res: any) => {
+        const ok = res?.status === 200 || res?.status === '200';
+        this.recentSales = ok ? res.transactions || [] : [];
+        if (!ok && res?.message) {
+          this.showMessage(res.message);
+        }
+      },
+      error: (err) => {
+        this.showMessage(
+          err?.error?.message ||
+            err?.message ||
+            'Could not load recent sales. Check that the API is running and restart the backend if you still see database errors.'
+        );
+      },
+    });
+  }
+
+  fetchProducts(): void {
     this.apiService.getAllProducts().subscribe({
       next: (res: any) => {
         if (res.status === 200) {
-          this.products = res.products;
+          this.products = res.products || [];
         }
       },
       error: (error) => {
         this.showMessage(
           error?.error?.message ||
             error?.message ||
-            'Unable to get Products' + error
+            'Unable to get products ' + error
         );
       },
     });
-
   }
 
-  //Handle form submission
-  handleSubmit():void{
+  handleSubmit(): void {
     if (!this.productId || !this.quantity) {
-      this.showMessage("Please fill all fields")
+      this.showMessage('Please fill all required fields');
       return;
     }
     const body = {
       productId: this.productId,
-      quantity:  parseInt(this.quantity, 10),
-      description: this.description
-    }
+      quantity: parseInt(this.quantity, 10),
+      description: this.description,
+    };
 
     this.apiService.sellProduct(body).subscribe({
       next: (res: any) => {
         if (res.status === 200) {
-          this.showMessage(res.message)
+          this.showMessage(res.message);
           this.resetForm();
+          this.fetchProducts();
+          this.loadRecentSales();
         }
       },
       error: (error) => {
         this.showMessage(
           error?.error?.message ||
             error?.message ||
-            'Unable to sell a product' + error
+            'Unable to complete sale ' + error
         );
       },
-    })
-
+    });
   }
 
-  
-  resetForm():void{
+  resetForm(): void {
     this.productId = '';
     this.description = '';
     this.quantity = '';
   }
-
-
-  
-
-
 
   showMessage(message: string) {
     this.message = message;
@@ -94,4 +115,3 @@ export class SellComponent implements OnInit {
     }, 4000);
   }
 }
-

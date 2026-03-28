@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -110,16 +111,23 @@ public class UserServiceImpl implements UserService {
     @Override
     public Response updateUser(Long id, UserDTO userDTO) {
 
+        User current = getCurrentLoggedInUser();
+        if (!UserRole.ADMIN.equals(current.getRole()) && !current.getId().equals(id)) {
+            throw new AccessDeniedException("You can only update your own profile");
+        }
+
         User existingUser = userRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("User Not Found"));
 
         if (userDTO.getEmail() != null) existingUser.setEmail(userDTO.getEmail());
         if (userDTO.getName() != null) existingUser.setName(userDTO.getName());
         if (userDTO.getPhoneNumber() != null) existingUser.setPhoneNumber(userDTO.getPhoneNumber());
-        if (userDTO.getRole() != null) existingUser.setRole(userDTO.getRole());
+        if (userDTO.getRole() != null && UserRole.ADMIN.equals(current.getRole())) {
+            existingUser.setRole(userDTO.getRole());
+        }
 
         if (userDTO.getPassword() != null && !userDTO.getPassword().isEmpty()) {
-            existingUser.setPhoneNumber(passwordEncoder.encode(userDTO.getPassword()));
+            existingUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         }
 
         userRepository.save(existingUser);

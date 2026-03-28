@@ -15,6 +15,10 @@ export class SupplierComponent implements OnInit {
   suppliers: any[] = [];
   message: string = '';
 
+  get withAddressCount(): number {
+    return this.suppliers.filter((s) => !!s.address?.trim()).length;
+  }
+
   ngOnInit(): void {
     this.getSuppliers();
   }

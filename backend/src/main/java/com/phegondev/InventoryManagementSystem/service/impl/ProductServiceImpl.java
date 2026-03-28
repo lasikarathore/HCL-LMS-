@@ -4,20 +4,25 @@ import com.phegondev.InventoryManagementSystem.dto.ProductDTO;
 import com.phegondev.InventoryManagementSystem.dto.Response;
 import com.phegondev.InventoryManagementSystem.entity.Category;
 import com.phegondev.InventoryManagementSystem.entity.Product;
+import com.phegondev.InventoryManagementSystem.exceptions.ConflictException;
 import com.phegondev.InventoryManagementSystem.exceptions.NotFoundException;
 import com.phegondev.InventoryManagementSystem.repository.CategoryRepository;
 import com.phegondev.InventoryManagementSystem.repository.ProductRepository;
+import com.phegondev.InventoryManagementSystem.repository.TransactionRepository;
 import com.phegondev.InventoryManagementSystem.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,11 +34,15 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
     private final CategoryRepository categoryRepository;
+    private final TransactionRepository transactionRepository;
 
     private static final String IMAGE_DIRECTORY = System.getProperty("user.dir") + "/product-image/";
 
-    //AFTER YOUR FROTEND IS SET UP WROTE THIS SO THE IMAGE IS SAVED IN YOUR FRONTEND PUBLIC FOLDER
-    private static final String IMAGE_DIRECTOR_FRONTEND = "/Users/apple/Desktop/Hcl project1/IMS-angular/frontend/public/products/";
+    @Value("${ims.upload.images-relative:../frontend/public/products/}")
+    private String imagesRelativePath;
+
+    @Value("${ims.low-stock-threshold:10}")
+    private int lowStockThreshold;
 
 
     @Override
@@ -119,8 +128,10 @@ public class ProductServiceImpl implements ProductService {
     public Response getAllProducts() {
 
         List<Product> products = productRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
-
-        List<ProductDTO> productDTOS = modelMapper.map(products, new TypeToken<List<ProductDTO>>() {}.getType());
+        List<ProductDTO> productDTOS = new ArrayList<>();
+        for (Product p : products) {
+            productDTOS.add(toProductDto(p));
+        }
 
         return Response.builder()
                 .status(200)
@@ -135,12 +146,27 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Product Not Found"));
 
-
         return Response.builder()
                 .status(200)
                 .message("success")
-                .product(modelMapper.map(product, ProductDTO.class))
+                .product(toProductDto(product))
                 .build();
+    }
+
+    private ProductDTO toProductDto(Product product) {
+        ProductDTO dto = modelMapper.map(product, ProductDTO.class);
+        if (product.getCategory() != null) {
+            dto.setCategoryId(product.getCategory().getId());
+        }
+        int q = product.getStockQuantity() == null ? 0 : product.getStockQuantity();
+        if (q < lowStockThreshold) {
+            dto.setStockLevel("LOW");
+        } else if (q < lowStockThreshold * 5) {
+            dto.setStockLevel("MEDIUM");
+        } else {
+            dto.setStockLevel("OK");
+        }
+        return dto;
     }
 
     @Override
@@ -148,6 +174,13 @@ public class ProductServiceImpl implements ProductService {
 
         productRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Product Not Found"));
+
+        long refCount = transactionRepository.countByProduct_Id(id);
+        if (refCount > 0) {
+            throw new ConflictException(
+                    "Cannot delete this product: " + refCount + " transaction(s) still reference it. "
+                            + "Remove or archive transactions first, or keep the product for audit history.");
+        }
 
         productRepository.deleteById(id);
 
@@ -162,8 +195,8 @@ public class ProductServiceImpl implements ProductService {
         if (!imageFile.getContentType().startsWith("image/")){
             throw new IllegalArgumentException("Only image files are allowed");
         }
-        //create the directory to store images if it doesn't exist
-        File directory = new File(IMAGE_DIRECTOR_FRONTEND);
+        Path baseDir = Paths.get(System.getProperty("user.dir")).resolve(imagesRelativePath).normalize();
+        File directory = baseDir.toFile();
 
         if (!directory.exists()){
             directory.mkdirs();
@@ -172,7 +205,7 @@ public class ProductServiceImpl implements ProductService {
         //generate unique file name for the image
         String uniqueFileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
         //get the absolute path of the image
-        String imagePath = IMAGE_DIRECTOR_FRONTEND + uniqueFileName;
+        String imagePath = baseDir + File.separator + uniqueFileName;
 
         try {
             File desctinationFile = new File(imagePath);

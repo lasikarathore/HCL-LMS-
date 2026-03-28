@@ -1,52 +1,92 @@
-<div class="purchase-form-page">
+<div class="ims-page form-page purchase-page">
   <p *ngIf="message" class="message">{{ message }}</p>
-  <h1>Receive Inventory</h1>
 
-  <!-- PRODUCT PURCHASE? INVENTORY RECEIVING PAGE -->
-  <form (ngSubmit)="handleSubmit()">
-
-    <div class="form-group">
-      <label for="">Select Product</label>
-      <select
-        name="productId"
-        class="form-control"
-        [(ngModel)]="productId"
-        id=""
-      >
-        <option value="">Select a product</option>
-        <option *ngFor="let product of products" [value]="product.id">
-          {{ product.name }}
-        </option>
-      </select>
+  <header class="ims-page-head">
+    <div>
+      <h1 class="ims-page-title">Purchase</h1>
+      <p class="ims-page-sub">Receive inventory and review recent purchase history</p>
     </div>
-    
-    <div class="form-group">
-      <label for="">Select Supplier</label>
-      <select
-        name="supplierId"
-        class="form-control"
-        [(ngModel)]="supplierId"
-        id=""
-      >
-        <option value="">Select a Supplier</option>
-        <option *ngFor="let supplier of suppliers" [value]="supplier.id">
-          {{ supplier.name }}
-        </option>
-      </select>
-    </div>
+  </header>
 
-    <div class="form-group">
-        <label for="">Description</label>
-        <input type="text" [(ngModel)]="description" name="description" class="form-control"/>
+  <div class="purchase-layout">
+    <section class="form-shell ims-card">
+      <div class="form-head">
+        <h2>New stock receipt</h2>
+        <p>Linked to live products and suppliers from the API</p>
       </div>
+      <form (ngSubmit)="handleSubmit()" class="stack-form">
+        <div>
+          <label class="ims-label">Product</label>
+          <select
+            class="ims-select"
+            name="productId"
+            [(ngModel)]="productId"
+            required
+          >
+            <option value="">Select product</option>
+            <option *ngFor="let product of products" [value]="product.id">
+              {{ product.name }} (stock {{ product.stockQuantity }})
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="ims-label">Supplier</label>
+          <select
+            class="ims-select"
+            name="supplierId"
+            [(ngModel)]="supplierId"
+            required
+          >
+            <option value="">Select supplier</option>
+            <option *ngFor="let supplier of suppliers" [value]="supplier.id">
+              {{ supplier.name }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="ims-label">Quantity</label>
+          <input
+            class="ims-input"
+            type="number"
+            min="1"
+            [(ngModel)]="quantity"
+            name="quantity"
+            required
+          />
+        </div>
+        <div>
+          <label class="ims-label">Notes</label>
+          <input
+            class="ims-input"
+            type="text"
+            [(ngModel)]="description"
+            name="description"
+            placeholder="Optional reference"
+          />
+        </div>
+        <button type="submit" class="ims-btn ims-btn-primary wide">
+          Record purchase
+        </button>
+      </form>
+    </section>
 
-
-    <div class="form-group">
-        <label for="">Quantity</label>
-        <input type="number" [(ngModel)]="quantity" name="quantity" class="form-control"/>
-      </div>
-
-
-      <button type="submit" class="btn btn-primary">Purchase Product</button>
-  </form>
+    <section class="history ims-card">
+      <h2 class="hist-title">Recent purchases</h2>
+      <ul class="hist-list" *ngIf="recentPurchases.length">
+        <li *ngFor="let t of recentPurchases">
+          <div>
+            <span class="hist-type">{{ t.transactionType }}</span>
+            <span class="hist-sub">{{ t.description || '—' }}</span>
+          </div>
+          <div class="hist-meta">
+            <span class="hist-amt">{{ t.totalPrice | currency : 'INR' : 'symbol' : '1.2-2' }}</span>
+            <span class="hist-date">{{
+              t.createdAt | date : 'MMM d, h:mm a'
+            }}</span>
+          </div>
+        </li>
+      </ul>
+      <p *ngIf="!recentPurchases.length" class="empty-hint">No purchases yet.</p>
+    </section>
+  </div>
 </div>

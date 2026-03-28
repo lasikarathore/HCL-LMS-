@@ -1,90 +1,79 @@
-.profile-page {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    padding: 20px;
-    }
-     
-    .profile-card {
-    background: linear-gradient(145deg, #f3f4f6, #ffffff);
-    border-radius: 15px;
-    box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1), -10px -10px 20px rgba(255, 255, 255, 0.5);
-    padding: 40px;
-    width: 60%;
-    text-align: center;
-    transition: transform 0.3s ease-in-out;
-    }
-     
-     
-    .profile-card:hover {
-    transform: scale(1.05);
-    box-shadow: 10px 20px 40px rgba(0, 0, 0, 0.15);
-    }
-     
-    .profile-card h1 {
-    font-size: 2.5rem;
-    color: #17a2b8;
-    margin-bottom: 100px;
-    animation: fadeIn 1s ease-in-out;
-    text-transform: capitalize;
-    }
-     
-    .profile-info {
-    padding: 20px;
-    background: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: inset 5px 5px 10px rgba(0, 0, 0, 0.05);
-    }
-     
-    .profile-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    font-size: 20px;
-    color: #444;
-    border-bottom: 1px solid #eee;
-    transition: color 0.2s;
-    }
-     
-    .profile-item label {
-    font-weight: bold;
-    color: #17a2b8;
-    }
-     
-    .profile-item span {
-    color: #333;
-    }
-     
-     
-    /* Animations */
-    @keyframes fadeIn {
-    from {
-    opacity: 0;
-    transform: translateY(-20px);
-    }
-     
-    to {
-    opacity: 1;
-    transform: translateY(0);
-    }
-    }
-     
-    @keyframes slideDown {
-    from {
-    opacity: 0;
-    transform: translateY(-30px);
-    }
-     
-    to {
-    opacity: 1;
-    transform: translateY(0);
-    }
-    }
-     
-    @keyframes fadeOut {
-    to {
-    opacity: 0;
-    }
-    }
-    
+.profile-layout {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .profile-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hero {
+  background: linear-gradient(135deg, #1a1d24 0%, #2d3544 100%);
+  color: #e8eef3;
+  border: none;
+  padding: 32px;
+}
+
+.hero-inner {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #b8d4e8;
+}
+
+.hero-name {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.hero-email {
+  font-size: 14px;
+  opacity: 0.75;
+  margin-bottom: 12px;
+}
+
+.role-pill {
+  background: rgba(255, 255, 255, 0.15);
+  color: #e8eef3;
+}
+
+.edit-panel {
+  padding: 28px;
+}
+
+.panel-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.stack-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.wide {
+  width: 100%;
+  margin-top: 8px;
+}

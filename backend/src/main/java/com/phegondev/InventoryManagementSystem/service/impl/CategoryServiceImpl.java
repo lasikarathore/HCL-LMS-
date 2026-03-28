@@ -6,6 +6,7 @@ import com.phegondev.InventoryManagementSystem.dto.Response;
 import com.phegondev.InventoryManagementSystem.entity.Category;
 import com.phegondev.InventoryManagementSystem.exceptions.NotFoundException;
 import com.phegondev.InventoryManagementSystem.repository.CategoryRepository;
+import com.phegondev.InventoryManagementSystem.repository.ProductRepository;
 import com.phegondev.InventoryManagementSystem.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
 
     @Override
@@ -41,6 +43,9 @@ public class CategoryServiceImpl implements CategoryService {
         List<Category> categories = categoryRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
 
         List<CategoryDTO> categoryDTOS = modelMapper.map(categories, new TypeToken<List<CategoryDTO>>() {}.getType());
+        for (CategoryDTO dto : categoryDTOS) {
+            dto.setProductCount(productRepository.countByCategory_Id(dto.getId()));
+        }
 
         return Response.builder()
                 .status(200)

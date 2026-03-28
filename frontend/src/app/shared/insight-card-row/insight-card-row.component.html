@@ -1,0 +1,41 @@
+<div class="insight-row" *ngIf="cards?.length">
+  <article
+    class="insight-card ims-card"
+    *ngFor="let card of cards; let i = index"
+    [ngClass]="cardClass(i)"
+  >
+    <div class="insight-card-top">
+      <div>
+        <span class="insight-badge">{{ card.badgeText }}</span>
+        <h3 class="insight-title">{{ card.title }}</h3>
+      </div>
+      <button type="button" class="kebab" aria-label="More">⋯</button>
+    </div>
+    <div class="insight-value">{{ formatPrimary(card) }}</div>
+    <div
+      class="insight-trend"
+      [class.up]="card.trendPositive"
+      [class.down]="!card.trendPositive"
+      *ngIf="trendText(card)"
+    >
+      {{ trendText(card) }}
+    </div>
+    <div class="spark-host" *ngIf="sparkSeries(card).length">
+      <ngx-charts-line-chart
+        [view]="sparkView"
+        [results]="sparkLineChartResults(card)"
+        [scheme]="schemeAt(i)"
+        [schemeType]="schemeType"
+        [xAxis]="false"
+        [yAxis]="false"
+        [legend]="false"
+        [showGridLines]="false"
+        [timeline]="false"
+        [tooltipDisabled]="true"
+        [animations]="animations"
+        [autoScale]="true"
+      >
+      </ngx-charts-line-chart>
+    </div>
+  </article>
+</div>

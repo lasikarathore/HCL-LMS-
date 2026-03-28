@@ -1,78 +1,189 @@
+<div class="ims-page ref-dash">
+  <p *ngIf="message" class="ims-toast ims-error">{{ message }}</p>
 
-<div class="dashboard-container">
-    <h1>Transaction Dashboard</h1>
+  <header class="ref-hero">
+    <div>
+      <h1 class="ims-page-title">Your analytics</h1>
+      <p class="ref-greet" *ngIf="user">
+        Hello {{ user.name }}
+        <span class="ref-greet-sub" *ngIf="summary">
+          · Inventory {{ formatMoney(summary.inventoryValue) }}
+          <span class="dot">·</span>
+          {{ summary.saleTransactionsThisMonth }} sales this month
+        </span>
+      </p>
+    </div>
+    <div class="ref-hero-actions">
+      <div class="ref-search-pill">
+        <span class="search-ico">🔍</span>
+        <input type="search" placeholder="Search activity…" disabled />
+      </div>
+      <button type="button" class="ims-btn ims-btn-primary ref-filters">
+        Filters
+      </button>
+    </div>
+  </header>
 
-      
-    <!-- Transaction Selection -->
-    <div style="margin-bottom: 50px; margin-top: 30px;">
-        <label>Select Month:</label>
-        <select [(ngModel)]="selectedMonth">
-          <option *ngFor="let month of months" [value]="month.value">{{ month.name }}</option>
-        </select>
-    
-        <label>Select Year:</label>
-        <select [(ngModel)]="selectedYear">
-          <option *ngFor="let year of years" [value]="year">{{ year }}</option>
-        </select>
-    
-        <button (click)="loadMonthlyData()">Show Monthly Data</button>
+  <app-insight-card-row [cards]="summary?.insightCards"></app-insight-card-row>
+
+  <div class="ref-main-split" *ngIf="summary">
+    <section class="ref-chart-panel ims-card">
+      <div class="ref-panel-head">
+        <div>
+          <h2 class="panel-h2">Inventory process</h2>
+          <p class="panel-sub">7-day volume from your ledger</p>
+        </div>
+        <div class="ref-tabs">
+          <button
+            type="button"
+            [class.active]="mainTab === 'bar'"
+            (click)="mainTab = 'bar'"
+          >
+            Volume
+          </button>
+          <button
+            type="button"
+            [class.active]="mainTab === 'line'"
+            (click)="mainTab = 'line'"
+          >
+            Trend
+          </button>
+        </div>
+      </div>
+      <ngx-charts-bar-vertical
+        *ngIf="mainTab === 'bar' && points(summary.sevenDayVolumeBars).length"
+        [view]="mainChartView"
+        [scheme]="chartScheme"
+        [schemeType]="schemeType"
+        [results]="points(summary.sevenDayVolumeBars)"
+        [gradient]="true"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="showLegend"
+        [showXAxisLabel]="true"
+        [showYAxisLabel]="true"
+        xAxisLabel="Day"
+        yAxisLabel="Amount"
+        [animations]="animations"
+        [roundEdges]="true"
+      >
+      </ngx-charts-bar-vertical>
+      <ngx-charts-line-chart
+        *ngIf="mainTab === 'line' && lineChartResults(summary.sevenDayVolumeLine).length"
+        [view]="mainChartView"
+        [scheme]="chartScheme"
+        [schemeType]="schemeType"
+        [results]="lineChartResults(summary.sevenDayVolumeLine)"
+        [gradient]="true"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="showLegend"
+        [showXAxisLabel]="true"
+        [showYAxisLabel]="true"
+        xAxisLabel="Day"
+        yAxisLabel="Amount"
+        [animations]="animations"
+        [autoScale]="true"
+      >
+      </ngx-charts-line-chart>
+      <p
+        *ngIf="!points(summary.sevenDayVolumeBars).length"
+        class="panel-empty"
+      >
+        No 7-day activity yet.
+      </p>
+    </section>
+
+    <aside class="ref-dark-stack">
+      <div class="ref-dark-card">
+        <h3 class="dark-title">Category share</h3>
+        <p class="dark-sub">By inventory valuation</p>
+        <div
+          class="hmetric"
+          *ngFor="let row of summary.categoryInventoryShare; let i = index"
+        >
+          <div class="hmetric-label">
+            <span>{{ row.label }}</span>
+            <span class="hmetric-pct">{{ row.percent }}%</span>
+          </div>
+          <div class="hmetric-track">
+            <div
+              class="hmetric-fill"
+              [ngClass]="hbarClass(row.colorIndex ?? i)"
+              [style.width.%]="row.percent"
+            ></div>
+          </div>
+        </div>
+        <p
+          *ngIf="!summary.categoryInventoryShare?.length"
+          class="dark-empty"
+        >
+          Add categorized products to see splits.
+        </p>
       </div>
 
-  
-    <!-- Transaction Type Count Bar Chart -->
-    <div style="margin-bottom: 30px;">
-      <h2>Transaction Counts by Type</h2>
-      <ngx-charts-bar-vertical
-        [view]="view"
-        [scheme]="'vivid'"
-        [results]="transactionTypeData"
-        [gradient]="false"
-        [xAxis]="true"
-        [yAxis]="true"
-        [legend]="showLegend"
-        [showXAxisLabel]="true"
-        [showYAxisLabel]="true"
-        xAxisLabel="Transaction Type"
-        yAxisLabel="Count"
-        [animations]="animations">
-      </ngx-charts-bar-vertical>
-    </div>
-  
-    <!-- Transaction Amount by Type Pie Chart -->
-    <div style="margin-bottom: 30px;">
-      <h2>Total Transaction Amount by Type</h2>
-      <ngx-charts-pie-chart
-        [view]="view"
-        [scheme]="'cool'"
-        [results]="transactionAmountData"
-        [legend]="showLegend"
-        [labels]="showLabels"
-        [doughnut]="false"
-        [animations]="animations">
-      </ngx-charts-pie-chart>
-    </div>
-  
-
-
-    <!-- Monthly Transaction Bar Chart -->
-    <h2 style="margin-bottom: 50px;">Monthly Transaction Chart</h2>
-
-    <div *ngIf="monthlyTransactionData.length">
-      <ngx-charts-bar-vertical
-        [view]="view"
-        [scheme]="'flame'"
-        [results]="monthlyTransactionData"
-        [gradient]="false"
-        [xAxis]="true"
-        [yAxis]="true"
-        [legend]="showLegend"
-        [showXAxisLabel]="true"
-        [showYAxisLabel]="true"
-        xAxisLabel="Day of Month"
-        yAxisLabel="Total Price"
-        [animations]="animations">
-      </ngx-charts-bar-vertical>
-    </div>
+      <div class="ref-dark-card donut-card">
+        <h3 class="dark-title">Activity mix</h3>
+        <p class="dark-sub">Last 30 days · transaction types</p>
+        <ngx-charts-pie-chart
+          *ngIf="points(summary.activityDonutLast30Days).length"
+          [view]="donutView"
+          [scheme]="chartScheme"
+          [schemeType]="schemeType"
+          [results]="points(summary.activityDonutLast30Days)"
+          [legend]="true"
+          legendTitle="Transaction types"
+          [legendPosition]="donutLegendPosition"
+          [labels]="showLabels"
+          [doughnut]="true"
+          [arcWidth]="0.35"
+          [gradient]="true"
+          [animations]="animations"
+        >
+        </ngx-charts-pie-chart>
+        <p
+          *ngIf="!points(summary.activityDonutLast30Days).length"
+          class="dark-empty"
+        >
+          No transactions in the last 30 days.
+        </p>
+      </div>
+    </aside>
   </div>
-  
-  
+
+  <section class="ref-recent ims-card" *ngIf="summary">
+    <div class="ref-recent-head">
+      <h2 class="panel-h2">Recent activities</h2>
+      <span class="ref-badge" *ngIf="summary.recentTransactions?.length">
+        {{ summary.recentTransactions.length }} latest
+      </span>
+    </div>
+    <div class="ref-table-wrap" *ngIf="summary.recentTransactions?.length">
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Product</th>
+            <th>Amount</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of summary.recentTransactions">
+            <td>
+              <span class="type-pill">{{ t.transactionType }}</span>
+            </td>
+            <td>{{ t.product?.name || '—' }}</td>
+            <td class="amt">{{ formatMoney(t.totalPrice) }}</td>
+            <td class="muted">
+              {{ t.createdAt | date : 'MMM d · h:mm a' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p *ngIf="!summary.recentTransactions?.length" class="dark-empty">
+      No recent transactions.
+    </p>
+  </section>
+</div>

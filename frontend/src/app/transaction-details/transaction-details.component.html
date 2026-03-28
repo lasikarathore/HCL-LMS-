@@ -1,65 +1,96 @@
-<div class="transaction-details-page">
-    <p *ngIf="message" class="message">{{message}}</p>
-    
-    <div *ngIf="transaction">
-        <!-- Transaction Information -->
-         <div class="section-card">
-            <h2>Transaction Information</h2>
-            <p>Type: {{transaction.transactionType}}</p>
-            <p>Status: {{transaction.status}}</p>
-            <p>Description: {{transaction.description}}</p>
-            <p>Total Products: {{transaction.totalProducts}}</p>
-            <p>Total Price: {{transaction.totalPrice | currency}}</p>
-            <p>Created At: {{transaction.createdAt | date:'short'}}</p>
+<div class="ims-page tx-detail" *ngIf="transaction">
+  <p *ngIf="message" class="ims-toast ims-error">{{ message }}</p>
 
-            <div *ngIf="transaction.updatedAt">
-                <p>Updated At: {{transaction.updatedAt | date:'short'}}</p>
-            </div>
-         </div>
-
-         <!-- PRODUCT INFORMATION -->
-         <div class="section-card">
-            <h2>Product Information</h2>
-            <p>Name: {{transaction.product.name}}</p>
-            <p>SKU: {{transaction.product.sku}}</p>
-            <p>Price: {{transaction.product.price | currency}}</p>
-            <p>Stock Quantity: {{transaction.product.stockQuantity}}</p>
-            <p>Description: {{transaction.product.description}}</p>
-
-            <div *ngIf="transaction.product.imageUrl">
-                <img [src]="transaction.prouct.imageUrl" alt="preview">
-            </div>
-         </div>
-
-         <!-- USER ASSOCIATED WITH THE TRANSACTIONS -->
-         <div class="section-card">
-            <h2>User Information</h2>
-            <p>Name: {{transaction.user.name}}</p>
-            <p>Email: {{transaction.user.email}}</p>
-            <p>Phone Number: {{transaction.user.phoneNumber}}</p>
-            <p>Role: {{transaction.user.role}}</p>
-
-         </div>
-
-         <!-- USER ASSOCIATED WITH THE TRANSACTIONS -->
-         <div *ngIf="transaction.supplier" class="section-card">
-            <h2>Supplier Information</h2>
-            <p>Name: {{transaction.supplier.name}}</p>
-            <p>Address: {{transaction.supplier.address}}</p>
-         </div>
-
-         <!-- UPDATE TRANSACTION -->
-         <div class="section-card transaction-staus-update">
-            <label for="">Status: </label>
-            <select [(ngModel)]="status" id="">
-                <option value="PENDING">PENDING</option>
-                <option value="PROCESSING">PROCESSING</option>
-                <option value="COMPLETED">COMPLETED</option>
-                <option value="CANCELED">CANCELED</option>
-            </select>
-            <button (click)="handleUpdateStatus()">Update Staus</button>
-         </div>
-
+  <header class="ims-page-head">
+    <div>
+      <h1 class="ims-page-title">Transaction #{{ transaction.id }}</h1>
+      <p class="ims-page-sub">{{ transaction.transactionType }} · {{ transaction.status }}</p>
     </div>
+  </header>
 
+  <div class="detail-grid">
+    <section class="ims-card detail-card">
+      <h2 class="block-title">Transaction</h2>
+      <dl class="kv">
+        <dt>Description</dt>
+        <dd>{{ transaction.description || '—' }}</dd>
+        <dt>Quantity</dt>
+        <dd>{{ transaction.totalProducts }}</dd>
+        <dt>Amount</dt>
+        <dd>{{ transaction.totalPrice | currency : 'INR' : 'symbol' : '1.2-2' }}</dd>
+        <dt>Created</dt>
+        <dd>{{ transaction.createdAt | date : 'medium' }}</dd>
+        <dt *ngIf="transaction.updatedAt">Updated</dt>
+        <dd *ngIf="transaction.updatedAt">
+          {{ transaction.updatedAt | date : 'medium' }}
+        </dd>
+      </dl>
+    </section>
+
+    <section class="ims-card detail-card" *ngIf="transaction.product">
+      <h2 class="block-title">Product</h2>
+      <div class="product-row">
+        <img
+          *ngIf="transaction.product.imageUrl"
+          [src]="transaction.product.imageUrl"
+          alt=""
+          class="pd-img"
+        />
+        <dl class="kv">
+          <dt>Name</dt>
+          <dd>{{ transaction.product.name }}</dd>
+          <dt>SKU</dt>
+          <dd>{{ transaction.product.sku }}</dd>
+          <dt>Unit price</dt>
+          <dd>{{ transaction.product.price | currency : 'INR' : 'symbol' : '1.2-2' }}</dd>
+          <dt>Stock</dt>
+          <dd>{{ transaction.product.stockQuantity }}</dd>
+        </dl>
+      </div>
+      <p class="desc">{{ transaction.product.description }}</p>
+    </section>
+
+    <section class="ims-card detail-card" *ngIf="transaction.user">
+      <h2 class="block-title">Recorded by</h2>
+      <dl class="kv">
+        <dt>Name</dt>
+        <dd>{{ transaction.user.name }}</dd>
+        <dt>Email</dt>
+        <dd>{{ transaction.user.email }}</dd>
+        <dt>Phone</dt>
+        <dd>{{ transaction.user.phoneNumber }}</dd>
+        <dt>Role</dt>
+        <dd>{{ transaction.user.role }}</dd>
+      </dl>
+    </section>
+
+    <section class="ims-card detail-card" *ngIf="transaction.supplier">
+      <h2 class="block-title">Supplier</h2>
+      <dl class="kv">
+        <dt>Name</dt>
+        <dd>{{ transaction.supplier.name }}</dd>
+        <dt>Address</dt>
+        <dd>{{ transaction.supplier.address || '—' }}</dd>
+      </dl>
+    </section>
+  </div>
+
+  <section class="ims-card status-card">
+    <h2 class="block-title">Update status</h2>
+    <div class="status-row">
+      <select class="ims-select" [(ngModel)]="status" name="status">
+        <option value="PENDING">PENDING</option>
+        <option value="PROCESSING">PROCESSING</option>
+        <option value="COMPLETED">COMPLETED</option>
+        <option value="CANCELED">CANCELED</option>
+      </select>
+      <button
+        type="button"
+        class="ims-btn ims-btn-primary"
+        (click)="handleUpdateStatus()"
+      >
+        Save status
+      </button>
+    </div>
+  </section>
 </div>

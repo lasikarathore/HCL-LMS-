@@ -1,42 +1,72 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
+import {
+  NavigationEnd,
+  Router,
+  RouterLink,
+  RouterLinkActive,
+  RouterOutlet,
+} from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { ApiService } from './service/api.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
-
-
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
   title = 'ims';
+  shellVisible = true;
+  private sub?: Subscription;
+
   constructor(
     private apiService: ApiService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
+  ngOnInit(): void {
+    this.sub = this.router.events
+      .pipe(filter((e) => e instanceof NavigationEnd))
+      .subscribe(() => this.refreshShell());
+    this.refreshShell();
+  }
 
-isAuth():boolean{
-  return this.apiService.isAuthenticated();
-}
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
 
-isAdmin():boolean{
-  return this.apiService.isAdmin();
-}
+  private refreshShell(): void {
+    const path = this.router.url.split('?')[0];
+    this.shellVisible = !(
+      path === '/login' ||
+      path === '/register' ||
+      !this.apiService.isAuthenticated()
+    );
+    this.cdr.detectChanges();
+  }
 
-logOut():void{
-  this.apiService.logout();
-  this.router.navigate(["/login"])
-  this.cdr.detectChanges();
-}
+  isAuth(): boolean {
+    return this.apiService.isAuthenticated();
+  }
 
+  isAdmin(): boolean {
+    return this.apiService.isAdmin();
+  }
 
-
-
-
+  logOut(): void {
+    this.apiService.logout();
+    this.router.navigate(['/login']);
+    this.refreshShell();
+    this.cdr.detectChanges();
+  }
 }

@@ -1,38 +1,79 @@
-<div class="auth-container">
-  <h2>Register</h2>
-  <p *ngIf="message" class="message">{{ message }}</p>
-
-  <form (ngSubmit)="handleSubmit()">
-    <input
-      type="text"
-      placeholder="Name ..."
-      [(ngModel)]="formData.name"
-      name="name"
-      required
-    />
-    <input
-      type="email"
-      placeholder="Email ..."
-      [(ngModel)]="formData.email"
-      name="email"
-      required
-    />
-    <input
-      type="password"
-      placeholder="Psssword ..."
-      [(ngModel)]="formData.password"
-      name="password"
-      required
-    />
-    <input
-      type="number"
-      placeholder="Phone Number ..."
-      [(ngModel)]="formData.phoneNumber"
-      name="phoneNumber"
-      required
-    />
-
-    <button type="submit">Register</button>
-  </form>
-  <p>Already have an account?<a routerLink="/login" routerLinkActive="router-link-active" >Login</a></p>
+<div class="auth-split">
+  <div class="auth-visual">
+    <div class="auth-visual-inner">
+      <span class="auth-logo">IMS</span>
+      <h1>Create your account</h1>
+      <p>Choose your role and start managing inventory with realtime insights.</p>
+    </div>
+  </div>
+  <div class="auth-panel">
+    <div class="auth-card ims-card">
+      <h2 class="auth-title">Register</h2>
+      <p *ngIf="message" class="message">{{ message }}</p>
+      <form (ngSubmit)="handleSubmit()" class="auth-form">
+        <div>
+          <label class="ims-label" for="reg-name">Full name</label>
+          <input
+            id="reg-name"
+            class="ims-input"
+            type="text"
+            [(ngModel)]="formData.name"
+            name="name"
+            required
+          />
+        </div>
+        <div>
+          <label class="ims-label" for="reg-email">Email</label>
+          <input
+            id="reg-email"
+            class="ims-input"
+            type="email"
+            [(ngModel)]="formData.email"
+            name="email"
+            required
+          />
+        </div>
+        <div>
+          <label class="ims-label" for="reg-phone">Phone</label>
+          <input
+            id="reg-phone"
+            class="ims-input"
+            type="text"
+            [(ngModel)]="formData.phoneNumber"
+            name="phoneNumber"
+            required
+          />
+        </div>
+        <div>
+          <label class="ims-label" for="reg-role">Role</label>
+          <select
+            id="reg-role"
+            class="ims-select"
+            [(ngModel)]="formData.role"
+            name="role"
+          >
+            <option value="MANAGER">Manager</option>
+            <option value="ADMIN">Admin</option>
+          </select>
+        </div>
+        <div>
+          <label class="ims-label" for="reg-pass">Password</label>
+          <input
+            id="reg-pass"
+            class="ims-input"
+            type="password"
+            [(ngModel)]="formData.password"
+            name="password"
+            required
+          />
+        </div>
+        <button type="submit" class="ims-btn ims-btn-primary auth-submit">
+          Create account
+        </button>
+      </form>
+      <p class="auth-footer">
+        Already have an account? <a routerLink="/login">Sign in</a>
+      </p>
+    </div>
+  </div>
 </div>

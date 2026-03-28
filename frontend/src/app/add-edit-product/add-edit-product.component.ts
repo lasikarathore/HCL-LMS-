@@ -68,9 +68,10 @@ export class AddEditProductComponent implements OnInit {
           this.sku = product.sku;
           this.price = product.price;
           this.stockQuantity = product.stockQuantity;
-          this.categoryId = product.caetgoryId;
+          this.categoryId = String(product.categoryId ?? '');
           this.description = product.description;
-          this.imageUrl = (product.imageUrl && !product.imageUrl.startsWith('/') && !product.imageUrl.startsWith('http')) ? '/' + product.imageUrl : product.imageUrl;
+          this.imageUrl =
+            ApiService.resolvePublicAsset(product.imageUrl) ?? product.imageUrl ?? '';
         }else{
           this.showMessage(res.message);
         }

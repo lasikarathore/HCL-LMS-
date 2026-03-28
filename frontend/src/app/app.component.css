@@ -1,118 +1,147 @@
-.dashboard-layout {
-    display: flex;
-    height: 100vh;
-    }
-     
-    .sidebar {
-     
-    width: 13%;
-    height: 100vh;
-    background: linear-gradient(135deg, #1c1e21, #3a3f44);
-    color: #f1f1f1;
+.ims-app-shell {
+  display: flex;
+  min-height: 100vh;
+  background: var(--ims-bg-page, #f4f6fa);
+}
+
+.ims-sidebar {
+  width: 248px;
+  flex-shrink: 0;
+  background: linear-gradient(180deg, #14161c 0%, #1f232c 100%);
+  color: #e4e8f0;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 18px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ims-sidebar-brand {
+  margin-bottom: 36px;
+  padding: 0 8px;
+}
+
+.ims-logo {
+  font-family: var(--font-display, Sora, sans-serif);
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #b8d4e8;
+  display: block;
+  line-height: 1.1;
+}
+
+.ims-logo-tag {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.55;
+}
+
+.ims-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.ims-nav a {
+  display: block;
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.18s, color 0.18s;
+}
+
+.ims-nav a:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.ims-nav a.active {
+  background: rgba(124, 158, 184, 0.22);
+  color: #dfeaf3;
+  font-weight: 600;
+}
+
+.ims-sidebar-footer {
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.ims-logout {
+  width: 100%;
+  padding: 11px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ims-logout:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.ims-main {
+  flex: 1;
+  min-width: 0;
+  padding: 32px 36px 48px;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.ims-main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.45) 0%,
+    transparent 120px
+  );
+  z-index: 0;
+}
+
+.ims-main > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 900px) {
+  .ims-app-shell {
     flex-direction: column;
-    justify-content: space-between;
-    padding: 30px 0px;
-    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
-    position: fixed;
-    transition: all 0.3s ease;
-    }
-     
-    .ims {
-    font-size: 34px;
-    margin-left: 20%;
-    color: #17a2b8;
-    font-weight: bold;
-    padding: 0;
-    margin-bottom: 0;
-    font-weight: 900;
-    }
-     
-    .nav-links {
-    list-style-type: none;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    }
-     
-    .nav-links li {
-    margin: 15px 0;
-    transition: transform 0.2s ease-in-out;
-    }
-     
-    .nav-links li a {
-    display: block;
-    color: #f1f1f1;
-    text-decoration: none;
-    padding: 10px 15px;
-    border-radius: 8px;
-    background: transparent;
-    transition: background 0.3s ease, color 0.3s ease;
-    font-size: 1rem;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    }
-     
-    .nav-links li a:hover {
-    background-color: #444;
-    }
-    
-    
-    
-    .nav-links a:hover {
-    color: #008080;
-    }
-     
-    .nav-links a.active {
-    background: rgba(106, 17, 203, 0.3);
-    color: #008080;
-    }
-     
-    .nav-links li:hover a {
-    background: rgba(37, 117, 252, 0.2);
-    }
-     
-    .nav-links a::before {
-    content: '→ ';
-    opacity: 0;
-    transition: opacity 0.2s ease, margin-left 0.3s ease;
-    }
-     
-    .nav-links li:hover a::before {
-    opacity: 1;
-    margin-left: -10px;
-    }
-    
-    
-    
-    .main-content {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    }
-     
-    @media (max-width: 768px) {
-    .sidebar {
-    width: 15%;
-    }
-     
-    .logo {
-    font-size: 1.5rem;
-    }
-     
-    .nav-links a {
-    font-size: 0.9rem;
-    }
-    }
-    
-    
-    
-    
-    /* Adjust margin to match the fixed sidebar width */
-    .main-content {
-    margin-left: 12%;
-    /* Sidebar width when fixed */
-    flex-grow: 1;
-    padding: 20px;
-    transition: margin-left 0.3s ease;
-    }
-    
+  }
+  .ims-sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+  }
+  .ims-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+  }
+  .ims-sidebar-footer {
+    margin-top: 0;
+    width: 100%;
+  }
+  .ims-main {
+    padding: 20px 16px 40px;
+  }
+}

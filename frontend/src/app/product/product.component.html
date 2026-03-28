@@ -1,42 +1,68 @@
-<div class="product-page">
-  <p class="message" *ngIf="message">{{ message }}</p>
+<div class="ims-page prod-page">
+  <p *ngIf="message" class="message">{{ message }}</p>
 
-  <!-- PRODUCT HEADER -->
-  <div class="product-header">
-    <h1>Products</h1>
-    <button class="add-product-btn" (click)="navigateToAddProductPage()">
-      Add Product
-    </button>
-  </div>
-
-  <!-- PRODUCT LIST -->
-  <div class="product-list" *ngIf="products.length > 0">
-    <div class="product-item" *ngFor="let product of products">
-      <img
-        [src]="product.imageUrl"
-        [alt]="product.name"
-        class="product-image"
-      />
-      <div class="product-info">
-        <h3 class="name">{{ product.name }}</h3>
-        <p class="sku">Sku: {{ product.sku }}</p>
-        <p class="sku">Sku: {{ product.price }}</p>
-        <p class="sku">Sku: {{ product.stockQuantity }}</p>
-      </div>
-
-      <!-- PRODUCT ACTIONS -->
-      <div class="product-actions">
-        <button (click)="navigateToEditProductPage(product.id)" class="edt-btn">
-          Edit
-        </button>
-        <button (click)="handleProductDelete(product.id)" class="delete-btn">
-          Delete
-        </button>
-      </div>
+  <header class="ims-page-head">
+    <div>
+      <h1 class="ims-page-title">Products</h1>
+      <p class="ims-page-sub">Grid view with live stock levels from your catalog</p>
     </div>
+    <button
+      type="button"
+      class="ims-btn ims-btn-primary"
+      (click)="navigateToAddProductPage()"
+    >
+      Add product
+    </button>
+  </header>
+
+  <div class="prod-grid" *ngIf="products.length > 0">
+    <article class="prod-card ims-card" *ngFor="let product of products">
+      <div class="prod-thumb">
+        <img
+          *ngIf="product.imageUrl"
+          [src]="product.imageUrl"
+          [alt]="product.name"
+        />
+        <div *ngIf="!product.imageUrl" class="prod-thumb-fallback">
+          {{ product.name?.charAt(0) || '?' }}
+        </div>
+        <span
+          class="ims-pill stock-pill"
+          [ngClass]="stockClass(product.stockLevel)"
+          >{{ product.stockLevel || '—' }}</span
+        >
+      </div>
+      <div class="prod-body">
+        <h3>{{ product.name }}</h3>
+        <p class="prod-sku">SKU {{ product.sku }}</p>
+        <div class="prod-stats">
+          <span>{{ product.price | currency : 'INR' : 'symbol' : '1.2-2' }}</span>
+          <span class="prod-stock">{{ product.stockQuantity }} in stock</span>
+        </div>
+        <div class="prod-actions">
+          <button
+            type="button"
+            class="ims-btn ims-btn-ghost"
+            (click)="navigateToEditProductPage(product.id)"
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            class="ims-btn ims-btn-danger"
+            (click)="handleProductDelete(product.id)"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </article>
   </div>
 
-  <!-- PAGONATIOOPN COMPONETN IN USE -->
+  <p *ngIf="!products.length && !message" class="empty-state ims-card">
+    No products yet. Add your first item to the catalog.
+  </p>
+
   <app-pagination
     [currentPage]="currentPage"
     [totalPages]="totalPages"

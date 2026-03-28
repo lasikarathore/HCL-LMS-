@@ -12,85 +12,93 @@ import { Router } from '@angular/router';
   styleUrl: './product.component.css',
 })
 export class ProductComponent implements OnInit {
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(
+    private apiService: ApiService,
+    private router: Router
+  ) {}
   products: any[] = [];
+  allProducts: any[] = [];
   message: string = '';
   currentPage: number = 1;
   totalPages: number = 0;
-  itemsPerPage: number = 10;
+  itemsPerPage: number = 12;
 
   ngOnInit(): void {
     this.fetchProducts();
   }
 
-  //FETCH PRODUCTS
   fetchProducts(): void {
     this.apiService.getAllProducts().subscribe({
       next: (res: any) => {
-        const products = res.products || [];
-        products.forEach((p: any) => {
-          if (p.imageUrl && !p.imageUrl.startsWith('/') && !p.imageUrl.startsWith('http')) {
-            p.imageUrl = '/' + p.imageUrl;
-          }
-        });
-        console.log(products[0]?.imageUrl)
-
-        this.totalPages = Math.ceil(products.length / this.itemsPerPage);
-
-        this.products = products.slice(
-          (this.currentPage - 1) * this.itemsPerPage,
-          this.currentPage * this.itemsPerPage
+        const raw = res.products || [];
+        this.allProducts = raw.map((p: any) => this.normalizeProduct(p));
+        this.totalPages = Math.max(
+          1,
+          Math.ceil(this.allProducts.length / this.itemsPerPage)
         );
-        
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        this.products = this.allProducts.slice(
+          start,
+          start + this.itemsPerPage
+        );
       },
       error: (error) => {
         this.showMessage(
           error?.error?.message ||
             error?.message ||
-            'Unable to edit category' + error
+            'Unable to load products ' + error
         );
       },
     });
   }
 
-  //DELETE A PRODUCT
+  private normalizeProduct(p: any): any {
+    const img = ApiService.resolvePublicAsset(p.imageUrl);
+    if (img) {
+      p.imageUrl = img;
+    }
+    return p;
+  }
+
+  stockClass(level: string | undefined): string {
+    if (level === 'LOW') return 'ims-pill-low';
+    if (level === 'MEDIUM') return 'ims-pill-med';
+    return 'ims-pill-ok';
+  }
+
   handleProductDelete(productId: string): void {
     if (window.confirm('Are you sure you want to delete this product?')) {
       this.apiService.deleteProduct(productId).subscribe({
         next: (res: any) => {
           if (res.status === 200) {
             this.showMessage('Product deleted successfully');
-            this.fetchProducts(); //reload the products
+            this.fetchProducts();
           }
         },
         error: (error) => {
           this.showMessage(
             error?.error?.message ||
               error?.message ||
-              'Unable to Delete product' + error
+              'Unable to delete product' + error
           );
         },
       });
     }
   }
 
-  //HANDLE PAGE CHANGRTE. NAVIGATR TO NEXT< PREVIOUS OR SPECIFIC PAGE CHANGE
   onPageChange(page: number): void {
     this.currentPage = page;
     this.fetchProducts();
   }
 
-  //NAVIGATE TO ADD PRODUCT PAGE
   navigateToAddProductPage(): void {
     this.router.navigate(['/add-product']);
   }
 
-  //NAVIGATE TO EDIT PRODUCT PAGE
   navigateToEditProductPage(productId: string): void {
     this.router.navigate([`/edit-product/${productId}`]);
   }
 
-  //SHOW ERROR
   showMessage(message: string) {
     this.message = message;
     setTimeout(() => {

@@ -1,53 +1,286 @@
-<div class="transactions-page">
-  <p *ngIf="message" class="message">{{ message }}</p>
+<div class="ims-page tx-ref">
+  <p *ngIf="message" class="ims-toast ims-error">{{ message }}</p>
 
-  <!-- TRANSCATIONS HEADER -->
-  <div class="transactions-header">
-    <h1>Transactions</h1>
-    <div class="transaction-search">
-      <input
-        type="text"
-        [(ngModel)]="searchInput"
-        placeholder="Search transactions .."
-      />
-      <button (click)="handleSearch()">Search</button>
+  <header class="tx-hero">
+    <div>
+      <h1 class="ims-page-title">Transactions</h1>
+      <p class="tx-greet" *ngIf="user">
+        {{ user.name }} — market view & ledger
+      </p>
     </div>
+    <div class="tx-hero-actions">
+      <div class="tx-search-pill">
+        <span class="search-ico">🔍</span>
+        <input type="search" placeholder="Search ledger…" disabled />
+      </div>
+      <button type="button" class="ims-btn ims-btn-primary">Filters</button>
+    </div>
+  </header>
+
+  <app-insight-card-row [cards]="analytics?.insightCards"></app-insight-card-row>
+
+  <div class="tx-split" *ngIf="analytics">
+    <section class="tx-market ims-card">
+      <div class="tx-market-head">
+        <div>
+          <h2 class="tx-h2">Market overview</h2>
+          <p class="tx-sub">7-day total volume · same palette as dashboard</p>
+        </div>
+        <span class="tx-chip">Live data</span>
+      </div>
+      <ngx-charts-line-chart
+        *ngIf="lineChartResults(analytics.sevenDayVolumeLine).length"
+        [view]="lineView"
+        [scheme]="chartScheme"
+        [schemeType]="schemeType"
+        [results]="lineChartResults(analytics.sevenDayVolumeLine)"
+        [gradient]="true"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="true"
+        [showXAxisLabel]="true"
+        [showYAxisLabel]="true"
+        xAxisLabel="Day"
+        yAxisLabel="Amount"
+        [animations]="animations"
+        [autoScale]="true"
+      >
+      </ngx-charts-line-chart>
+      <p *ngIf="!points(analytics.sevenDayVolumeLine).length" class="tx-empty">
+        Not enough history for a trend yet.
+      </p>
+
+      <div class="month-strip ims-card inner">
+        <div class="month-strip-fields">
+          <div>
+            <label class="ims-label">Drill-down month</label>
+            <select class="ims-select" [(ngModel)]="selectedMonth">
+              <option *ngFor="let m of months" [value]="m.value">
+                {{ m.name }}
+              </option>
+            </select>
+          </div>
+          <div>
+            <label class="ims-label">Year</label>
+            <select class="ims-select" [(ngModel)]="selectedYear">
+              <option *ngFor="let y of years" [value]="y">{{ y }}</option>
+            </select>
+          </div>
+          <button
+            type="button"
+            class="ims-btn ims-btn-primary"
+            (click)="applyChartMonth()"
+          >
+            Load daily bars
+          </button>
+        </div>
+        <ngx-charts-bar-vertical
+          *ngIf="points(analytics.dailyAmountsInMonth).length"
+          [view]="dailyView"
+          [scheme]="chartScheme"
+          [schemeType]="schemeType"
+          [results]="points(analytics.dailyAmountsInMonth)"
+          [gradient]="true"
+          [xAxis]="true"
+          [yAxis]="true"
+          [legend]="false"
+          [showXAxisLabel]="true"
+          [showYAxisLabel]="true"
+          xAxisLabel="Day of month"
+          yAxisLabel="Amount"
+          [animations]="animations"
+          [roundEdges]="true"
+        >
+        </ngx-charts-bar-vertical>
+      </div>
+    </section>
+
+    <aside class="tx-dark-col">
+      <div class="tx-dark-panel">
+        <h3 class="dark-h">SKU concentration</h3>
+        <p class="dark-p">Top movers · 30 days</p>
+        <div
+          class="hmetric"
+          *ngFor="let row of analytics.topProductVolumeShare; let i = index"
+        >
+          <div class="hmetric-label">
+            <span>{{ row.label }}</span>
+            <span class="hmetric-pct">{{ row.percent }}%</span>
+          </div>
+          <div class="hmetric-track">
+            <div
+              class="hmetric-fill"
+              [ngClass]="hbarClass(row.colorIndex ?? i)"
+              [style.width.%]="row.percent"
+            ></div>
+          </div>
+        </div>
+        <p *ngIf="!analytics.topProductVolumeShare?.length" class="dark-p">
+          No SKU volume yet.
+        </p>
+      </div>
+
+      <div class="tx-dark-panel donut-panel">
+        <h3 class="dark-h">Type mix</h3>
+        <p class="dark-p">Last 30 days</p>
+        <ngx-charts-pie-chart
+          *ngIf="points(analytics.volumeDonutByTypeLast30Days).length"
+          [view]="donutView"
+          [scheme]="chartScheme"
+          [schemeType]="schemeType"
+          [results]="points(analytics.volumeDonutByTypeLast30Days)"
+          [legend]="true"
+          legendTitle="Transaction types"
+          [legendPosition]="donutLegendPosition"
+          [labels]="showLabels"
+          [doughnut]="true"
+          [arcWidth]="0.35"
+          [gradient]="true"
+          [animations]="animations"
+        >
+        </ngx-charts-pie-chart>
+      </div>
+
+      <div class="tx-dark-panel book-panel" *ngIf="analytics.topProductLeaders?.length">
+        <h3 class="dark-h">Volume leaders</h3>
+        <p class="dark-p">Notional last 30d</p>
+        <table class="book-table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Vol</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of analytics.topProductLeaders">
+              <td>{{ r.name }}</td>
+              <td class="num">{{ r.volumeLast30Days | currency : 'INR' : 'symbol' : '1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </aside>
   </div>
 
-  <!-- TRANSCATIONS TABLE -->
-  <div *ngIf="transactions.length > 0">
-    <table class="transactions-table">
-      <thead>
-        <tr>
-          <th>TYPE</th>
-          <th>STATUS</th>
-          <th>TOTAL PRICE</th>
-          <th>TOTAL PRODUCTS</th>
-          <th>DATE</th>
-          <th>ACTIONS</th>
-        </tr>
-      </thead>
+  <section class="tx-monthly ims-card" *ngIf="analytics">
+    <div class="tx-market-head">
+      <div>
+        <h2 class="tx-h2">Every month</h2>
+        <p class="tx-sub">
+          Volume (INR) by transaction type per month · last 12 months in your ledger
+        </p>
+      </div>
+    </div>
+    <ngx-charts-bar-vertical-2d
+      *ngIf="monthlyGroupedResults(analytics.monthlyAmountByType).length"
+      [view]="monthlyView"
+      [scheme]="chartScheme"
+      [schemeType]="schemeType"
+      [results]="monthlyGroupedResults(analytics.monthlyAmountByType)"
+      [gradient]="true"
+      [xAxis]="true"
+      [yAxis]="true"
+      [legend]="true"
+      [showXAxisLabel]="true"
+      [showYAxisLabel]="true"
+      xAxisLabel="Month"
+      yAxisLabel="Amount (INR)"
+      [animations]="animations"
+      [roundEdges]="true"
+      [showGridLines]="true"
+    >
+    </ngx-charts-bar-vertical-2d>
+    <p
+      *ngIf="!monthlyGroupedResults(analytics.monthlyAmountByType).length"
+      class="tx-empty"
+    >
+      Not enough monthly history to chart yet — record more transactions.
+    </p>
 
-      <tbody>
-        <tr *ngFor="let transaction of transactions">
-          <td>{{ transaction.transactionType }}</td>
-          <td>{{ transaction.status }}</td>
-          <td>{{ transaction.totalPrice }}</td>
-          <td>{{ transaction.totalProducts }}</td>
-          <td>{{ transaction.createdAt | date : "short" }}</td>
-          <td (click)="navigateTOTransactionsDetailsPage(transaction.id)">
-            <button>View Details</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+    <div class="tx-monthly-trend" *ngIf="lineChartResults(analytics.monthlyTotalVolume).length">
+      <h3 class="tx-h3">All types combined</h3>
+      <p class="tx-sub tight">Total INR per month (same window as above)</p>
+      <ngx-charts-line-chart
+        [view]="monthlyTrendView"
+        [scheme]="chartScheme"
+        [schemeType]="schemeType"
+        [results]="lineChartResults(analytics.monthlyTotalVolume)"
+        [gradient]="true"
+        [xAxis]="true"
+        [yAxis]="true"
+        [legend]="false"
+        [showXAxisLabel]="true"
+        [showYAxisLabel]="true"
+        xAxisLabel="Month"
+        yAxisLabel="Total (INR)"
+        [animations]="animations"
+        [autoScale]="true"
+      >
+      </ngx-charts-line-chart>
+    </div>
+  </section>
 
-  <!-- PAGONATIOOPN COMPONETN IN USE -->
-  <app-pagination
-    [currentPage]="currentPage"
-    [totalPages]="totalPages"
-    (pageChange)="onPageChange($event)"
-  >
-  </app-pagination>
+  <section class="tx-table-card ims-card">
+    <div class="table-section-head">
+      <h2 class="tx-h2">Full ledger</h2>
+      <div class="tx-search">
+        <input
+          class="ims-input"
+          type="text"
+          [(ngModel)]="searchInput"
+          placeholder="Search description, product, SKU…"
+          (keyup.enter)="handleSearch()"
+        />
+        <button type="button" class="ims-btn ims-btn-primary" (click)="handleSearch()">
+          Search
+        </button>
+      </div>
+    </div>
+
+    <div class="tx-table-wrap" *ngIf="transactions.length > 0">
+      <table class="tx-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Amount</th>
+            <th>Qty</th>
+            <th>Date</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let transaction of transactions">
+            <td>
+              <span class="tx-type">{{ transaction.transactionType }}</span>
+            </td>
+            <td>{{ transaction.status }}</td>
+            <td class="tx-money">{{ transaction.totalPrice | currency : 'INR' : 'symbol' : '1.2-2' }}</td>
+            <td>{{ transaction.totalProducts }}</td>
+            <td>{{ transaction.createdAt | date : 'MMM d, y · h:mm a' }}</td>
+            <td>
+              <button
+                type="button"
+                class="ims-btn ims-btn-ghost tx-view"
+                (click)="navigateTOTransactionsDetailsPage(transaction.id)"
+              >
+                View
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p *ngIf="!transactions.length && !message" class="empty-state">
+      No transactions match your filters.
+    </p>
+
+    <app-pagination
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      (pageChange)="onPageChange($event)"
+    >
+    </app-pagination>
+  </section>
 </div>

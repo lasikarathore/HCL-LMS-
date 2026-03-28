@@ -1,39 +1,83 @@
-<div class="purchase-form-page">
-    <p *ngIf="message" class="message">{{ message }}</p>
-    <h1>Sell Product</h1>
-  
-    <!-- PRODUCT PURCHASE? INVENTORY RECEIVING PAGE -->
-    <form (ngSubmit)="handleSubmit()">
-  
-      <div class="form-group">
-        <label for="">Select Product</label>
-        <select
-          name="productId"
-          class="form-control"
-          [(ngModel)]="productId"
-          id=""
-        >
-          <option value="">Select a product</option>
-          <option *ngFor="let product of products" [value]="product.id">
-            {{ product.name }}
-          </option>
-        </select>
-      </div>
-      
+<div class="ims-page form-page sell-page">
+  <p *ngIf="message" class="message">{{ message }}</p>
 
-      <div class="form-group">
-          <label for="">Description</label>
-          <input type="text" [(ngModel)]="description" name="description" class="form-control"/>
+  <header class="ims-page-head">
+    <div>
+      <h1 class="ims-page-title">Sell</h1>
+      <p class="ims-page-sub">Live line total and sales history from your ledger</p>
+    </div>
+  </header>
+
+  <div class="sell-layout">
+    <section class="form-shell ims-card">
+      <div class="form-head">
+        <h2>New sale</h2>
+        <p>Pricing and stock come from the selected SKU</p>
+      </div>
+      <form (ngSubmit)="handleSubmit()" class="stack-form">
+        <div>
+          <label class="ims-label">Product</label>
+          <select
+            class="ims-select"
+            name="productId"
+            [(ngModel)]="productId"
+            required
+          >
+            <option value="">Select product</option>
+            <option *ngFor="let product of products" [value]="product.id">
+              {{ product.name }} · {{ product.price | currency : 'INR' : 'symbol' : '1.2-2' }} ·
+              {{ product.stockQuantity }} available
+            </option>
+          </select>
         </div>
-  
-  
-      <div class="form-group">
-          <label for="">Quantity</label>
-          <input type="number" [(ngModel)]="quantity" name="quantity" class="form-control"/>
+        <div>
+          <label class="ims-label">Quantity</label>
+          <input
+            class="ims-input"
+            type="number"
+            min="1"
+            [(ngModel)]="quantity"
+            name="quantity"
+            required
+          />
         </div>
-  
-  
-        <button type="submit" class="btn btn-primary">Sell Product</button>
-    </form>
+        <div class="total-tile">
+          <span class="total-label">Line total</span>
+          <strong class="total-val">{{ lineTotal | currency : 'INR' : 'symbol' : '1.2-2' }}</strong>
+        </div>
+        <div>
+          <label class="ims-label">Notes</label>
+          <input
+            class="ims-input"
+            type="text"
+            [(ngModel)]="description"
+            name="description"
+            placeholder="Optional reference"
+          />
+        </div>
+        <button type="submit" class="ims-btn ims-btn-primary wide">
+          Complete sale
+        </button>
+      </form>
+    </section>
+
+    <section class="history ims-card">
+      <h2 class="hist-title">Recent sales</h2>
+      <ul class="hist-list" *ngIf="recentSales.length">
+        <li *ngFor="let t of recentSales">
+          <div>
+            <span class="hist-type">{{ t.transactionType }}</span>
+            <span class="hist-sub">{{ t.description || '—' }}</span>
+          </div>
+          <div class="hist-meta">
+            <span class="hist-amt">{{ t.totalPrice | currency : 'INR' : 'symbol' : '1.2-2' }}</span>
+            <span class="hist-date">{{
+              t.createdAt | date : 'MMM d, h:mm a'
+            }}</span>
+          </div>
+        </li>
+      </ul>
+      <p *ngIf="!recentSales.length" class="empty-hint">No sales yet.</p>
+    </section>
   </div>
-  
+</div>

@@ -1,6 +1,9 @@
 package com.phegondev.InventoryManagementSystem.service.impl;
 
+import com.phegondev.InventoryManagementSystem.dto.ChartPointDTO;
+import com.phegondev.InventoryManagementSystem.dto.ChartSeriesGroupDTO;
 import com.phegondev.InventoryManagementSystem.dto.Response;
+import com.phegondev.InventoryManagementSystem.dto.TransactionAnalyticsDTO;
 import com.phegondev.InventoryManagementSystem.dto.TransactionDTO;
 import com.phegondev.InventoryManagementSystem.dto.TransactionRequest;
 import com.phegondev.InventoryManagementSystem.entity.Product;
@@ -15,6 +18,7 @@ import com.phegondev.InventoryManagementSystem.repository.ProductRepository;
 import com.phegondev.InventoryManagementSystem.repository.SupplierRepository;
 import com.phegondev.InventoryManagementSystem.repository.TransactionRepository;
 import com.phegondev.InventoryManagementSystem.service.TransactionService;
+import com.phegondev.InventoryManagementSystem.service.TransactionTimeSeriesHelper;
 import com.phegondev.InventoryManagementSystem.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +27,19 @@ import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +51,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final SupplierRepository supplierRepository;
     private final UserService userService;
     private final ProductRepository productRepository;
+    private final TransactionTimeSeriesHelper timeSeriesHelper;
 
 
 
@@ -165,10 +177,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Response getAllTransactions(int page, int size, String searchText) {
+    public Response getAllTransactions(int page, int size, String searchText, TransactionType transactionType) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        Page<Transaction> transactionPage = transactionRepository.searchTransactions(searchText, pageable);
+        // Native search query orders by id in SQL; avoid extra ORDER BY from Pageable (invalid on native queries).
+        Pageable pageable = PageRequest.of(page, size);
+        String st = (searchText == null || searchText.isBlank()) ? null : searchText.trim();
+        String tx = transactionType == null ? null : transactionType.name();
+        Page<Transaction> transactionPage = transactionRepository.pageTransactionsFiltered(tx, st, pageable);
 
         List<TransactionDTO> transactionDTOS = modelMapper
                 .map(transactionPage.getContent(), new TypeToken<List<TransactionDTO>>() {}.getType());
@@ -184,6 +199,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .status(200)
                 .message("success")
                 .transactions(transactionDTOS)
+                .totalPages(transactionPage.getTotalPages())
+                .totalElements(transactionPage.getTotalElements())
                 .build();
     }
 
@@ -241,5 +258,97 @@ public class TransactionServiceImpl implements TransactionService {
                 .status(200)
                 .message("Transaction Status Successfully Updated")
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Response getTransactionAnalytics(Integer month, Integer year) {
+
+        List<ChartPointDTO> countByType = new ArrayList<>();
+        List<ChartPointDTO> amountByType = new ArrayList<>();
+        for (Object[] row : transactionRepository.aggregateCountAndAmountByType()) {
+            TransactionType tt = (TransactionType) row[0];
+            long cnt = ((Number) row[1]).longValue();
+            BigDecimal sum = row[2] == null ? BigDecimal.ZERO : (BigDecimal) row[2];
+            String name = tt.name();
+            countByType.add(ChartPointDTO.builder().name(name).value(BigDecimal.valueOf(cnt)).build());
+            amountByType.add(ChartPointDTO.builder().name(name).value(sum).build());
+        }
+
+        List<Object[]> monthTypeRows = transactionRepository.aggregateAmountByYearMonthAndType();
+        Map<String, Map<String, BigDecimal>> byYm = new LinkedHashMap<>();
+        for (Object[] row : monthTypeRows) {
+            int y = ((Number) row[0]).intValue();
+            int m = ((Number) row[1]).intValue();
+            TransactionType tt = (TransactionType) row[2];
+            BigDecimal amt = row[3] == null ? BigDecimal.ZERO : (BigDecimal) row[3];
+            String key = String.format(Locale.ROOT, "%04d-%02d", y, m);
+            byYm.computeIfAbsent(key, k -> new LinkedHashMap<>()).merge(tt.name(), amt, BigDecimal::add);
+        }
+
+        List<String> ymKeys = new ArrayList<>(byYm.keySet());
+        List<String> last12 = ymKeys.size() <= 12
+                ? ymKeys
+                : ymKeys.subList(ymKeys.size() - 12, ymKeys.size());
+
+        List<ChartSeriesGroupDTO> monthlyAmountByType = new ArrayList<>();
+        List<ChartPointDTO> monthlyTotalVolume = new ArrayList<>();
+        for (String key : last12) {
+            String label = formatYearMonthLabel(key);
+            Map<String, BigDecimal> types = byYm.get(key);
+            List<ChartPointDTO> series = new ArrayList<>();
+            BigDecimal monthTotal = BigDecimal.ZERO;
+            for (Map.Entry<String, BigDecimal> e : types.entrySet()) {
+                series.add(ChartPointDTO.builder().name(e.getKey()).value(e.getValue()).build());
+                monthTotal = monthTotal.add(e.getValue());
+            }
+            monthlyAmountByType.add(ChartSeriesGroupDTO.builder().name(label).series(series).build());
+            monthlyTotalVolume.add(ChartPointDTO.builder().name(label).value(monthTotal).build());
+        }
+
+        List<ChartPointDTO> dailyAmounts = new ArrayList<>();
+        if (month != null && year != null && month >= 1 && month <= 12) {
+            Map<Integer, BigDecimal> byDay = new TreeMap<>();
+            for (Transaction t : transactionRepository.findAllByMonthAndYear(month, year)) {
+                int day = t.getCreatedAt().getDayOfMonth();
+                BigDecimal price = t.getTotalPrice() == null ? BigDecimal.ZERO : t.getTotalPrice();
+                byDay.merge(day, price, BigDecimal::add);
+            }
+            for (Map.Entry<Integer, BigDecimal> e : byDay.entrySet()) {
+                dailyAmounts.add(ChartPointDTO.builder()
+                        .name("Day " + e.getKey())
+                        .value(e.getValue())
+                        .build());
+            }
+        }
+
+        var seven = timeSeriesHelper.buildSevenDayWindow(java.time.LocalDate.now());
+
+        TransactionAnalyticsDTO analytics = TransactionAnalyticsDTO.builder()
+                .countByType(countByType)
+                .amountByType(amountByType)
+                .dailyAmountsInMonth(dailyAmounts.isEmpty() ? null : dailyAmounts)
+                .monthlyAmountByType(monthlyAmountByType)
+                .monthlyTotalVolume(monthlyTotalVolume)
+                .insightCards(timeSeriesHelper.buildTransactionHubInsightCards())
+                .sevenDayVolumeBars(timeSeriesHelper.toBarPoints(seven))
+                .sevenDayVolumeLine(timeSeriesHelper.toLinePoints(seven))
+                .topProductVolumeShare(timeSeriesHelper.topProductHorizontalBars(6))
+                .volumeDonutByTypeLast30Days(timeSeriesHelper.donutByTypeLast30Days())
+                .topProductLeaders(timeSeriesHelper.topProductRows(8))
+                .build();
+
+        return Response.builder()
+                .status(200)
+                .message("success")
+                .transactionAnalytics(analytics)
+                .build();
+    }
+
+    private static String formatYearMonthLabel(String yyyyMm) {
+        String[] p = yyyyMm.split("-");
+        int y = Integer.parseInt(p[0]);
+        int m = Integer.parseInt(p[1]);
+        return Month.of(m).getDisplayName(TextStyle.SHORT, Locale.US) + " " + y;
     }
 }

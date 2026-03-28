@@ -1,5 +1,6 @@
 package com.phegondev.InventoryManagementSystem.entity;
 
+import com.phegondev.InventoryManagementSystem.converter.TransactionStatusBytesConverter;
 import com.phegondev.InventoryManagementSystem.enums.TransactionStatus;
 import com.phegondev.InventoryManagementSystem.enums.TransactionType;
 import jakarta.persistence.*;
@@ -30,7 +31,8 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionType transactionType;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = TransactionStatusBytesConverter.class)
+    @Column(name = "status")
     private TransactionStatus status;
 
     private String description;

@@ -40,6 +40,10 @@ public class Response {
     private TransactionDTO transaction;
     private List<TransactionDTO> transactions;
 
+    private DashboardSummaryDTO dashboardSummary;
+
+    private TransactionAnalyticsDTO transactionAnalytics;
+
     private final LocalDateTime timestamp = LocalDateTime.now();
 
 

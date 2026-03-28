@@ -1,62 +1,80 @@
-.supplier-page {
-    padding: 20px;
-    }
-     
-    .supplier-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 30px;
-    color: #17a2b8;
-    margin-left: 10px;
-    }
-     
-    .supplier-header button {
-    padding: 12px 12px;
-    background-color: #17a2b8;
-    font-size: 16px;
-    color: white;
-    border: none;
-    cursor: pointer;
-    }
-     
-    .add-sup {
-    margin: 0 auto;
-    }
-     
-    .supplier-list {
-    list-style: none;
-    padding: 0;
-    margin-top: 50px;
-    }
-    .supplier-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 18px;
-    margin: 5px;
-    font-size: 20px;
-    background-color: #f9f9f9;
-    border-bottom: 1px solid #eee;
-    border-radius: 10px;
-    color: #2F4F4F;
-    font-weight: 550;
-    }
-     
-    .supplier-item:hover {
-    background-color: #f9ffff;
-    }
-     
-    .supplier-actions button {
-     
-    margin-left: 10px;
-    background-color: #17a2b8;
-    font-size: 16px;
-    padding: 10px 20px;
-    color: white;
-    border: none;
-    cursor: pointer;
-    }
-     
-    .supplier-actions button:last-child {
-    background-color: #dc3545;
-    }
-    
+.sup-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.kpi-mini {
+  padding: 18px 20px;
+}
+
+.kpi-mini.pastel-sky {
+  background: linear-gradient(145deg, #dbeaf5, #e8f2fa);
+}
+
+.kpi-mini.pastel-mint {
+  background: linear-gradient(145deg, #d4ebe3, #e5f4ee);
+}
+
+.kpi-mini-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ims-text-muted);
+  margin-bottom: 8px;
+}
+
+.kpi-mini strong {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+}
+
+.sup-table-wrap {
+  overflow-x: auto;
+}
+
+.sup-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.sup-table th,
+.sup-table td {
+  padding: 14px 18px;
+  text-align: left;
+  border-bottom: 1px solid var(--ims-border);
+}
+
+.sup-table th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ims-text-muted);
+  background: #fafbfd;
+  font-weight: 700;
+}
+
+.sup-name {
+  font-weight: 600;
+}
+
+.sup-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.sup-actions .ims-btn {
+  margin-left: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.empty-state {
+  padding: 48px;
+  text-align: center;
+  color: var(--ims-text-muted);
+}

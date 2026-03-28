@@ -1,51 +1,103 @@
-<div class="product-form-page">
-    <p *ngIf="message" class="message">{{message}}</p>
-    <h1>{{isEditing? 'Edit Product' : 'Add Product'}}</h1>
-    <form (submit)="handleSubmit($event)">
-        <div class="form-group">
-            <label for="">Product Name</label>
-            <input type="text" [(ngModel)]="name" name="name" required>
+<div class="ims-page ae-product">
+  <p *ngIf="message" class="message">{{ message }}</p>
+
+  <header class="ims-page-head">
+    <div>
+      <h1 class="ims-page-title">
+        {{ isEditing ? 'Edit product' : 'Add product' }}
+      </h1>
+      <p class="ims-page-sub">Upload imagery and tie each SKU to a category</p>
+    </div>
+  </header>
+
+  <div class="form-shell ims-card">
+    <div class="form-head">
+      <h2>Product details</h2>
+      <p>All fields persist to the inventory API</p>
+    </div>
+    <form (submit)="handleSubmit($event)" class="stack-form">
+      <div class="two-col">
+        <div>
+          <label class="ims-label">Name</label>
+          <input
+            class="ims-input"
+            type="text"
+            [(ngModel)]="name"
+            name="name"
+            required
+          />
         </div>
-
-        <div class="form-group">
-            <label for="">Sku</label>
-            <input type="text" [(ngModel)]="sku" name="sku" required>
+        <div>
+          <label class="ims-label">SKU</label>
+          <input
+            class="ims-input"
+            type="text"
+            [(ngModel)]="sku"
+            name="sku"
+            required
+          />
         </div>
-
-        <div class="form-group">
-            <label for="">Stock Quantity</label>
-            <input type="number" [(ngModel)]="stockQuantity" name="stockQuantity" required>
+      </div>
+      <div class="two-col">
+        <div>
+          <label class="ims-label">Price</label>
+          <input
+            class="ims-input"
+            type="number"
+            step="0.01"
+            [(ngModel)]="price"
+            name="price"
+            required
+          />
         </div>
-
-        <div class="form-group">
-            <label for="">Price</label>
-            <input type="number" [(ngModel)]="price" name="price" required>
+        <div>
+          <label class="ims-label">Stock quantity</label>
+          <input
+            class="ims-input"
+            type="number"
+            [(ngModel)]="stockQuantity"
+            name="stockQuantity"
+            required
+          />
         </div>
-
-
-        <div class="form-group">
-            <label for="">Description</label>
-            <textarea [(ngModel)]="description" name="description" required></textarea>
+      </div>
+      <div>
+        <label class="ims-label">Category</label>
+        <select
+          class="ims-select"
+          [(ngModel)]="categoryId"
+          name="categoryId"
+          required
+        >
+          <option value="">Select category</option>
+          <option *ngFor="let category of categories" [value]="category.id">
+            {{ category.name }}
+          </option>
+        </select>
+      </div>
+      <div>
+        <label class="ims-label">Description</label>
+        <textarea
+          class="ims-textarea"
+          rows="3"
+          [(ngModel)]="description"
+          name="description"
+          required
+        ></textarea>
+      </div>
+      <div class="upload-block">
+        <label class="ims-label">Product image</label>
+        <label class="upload-zone">
+          <input type="file" accept="image/*" (change)="handleImageChange($event)" hidden />
+          <span>Drop or click to upload</span>
+        </label>
+        <div *ngIf="imageUrl" class="preview-wrap">
+          <img [src]="imageUrl" alt="Preview" class="preview-img" />
         </div>
-
-
-        <div class="form-group">
-            <label for="">Category</label>
-            <select [(ngModel)]="categoryId" name="categoryId" id="" required>
-                <option value="">Select a category</option>
-                <option *ngFor="let category of categories" [value]="category.id">{{category.name}}</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="">Product Image</label>
-            <input type="file" (change)="handleImageChange($event)">
-            <div *ngIf="imageUrl">
-                <img [src]="imageUrl" alt="preview" class="image-preview">
-            </div>
-        </div>
-
-        <button type="submit">{{isEditing? 'Edit Product' : 'Add Product'}}</button>
+      </div>
+      <button type="submit" class="ims-btn ims-btn-primary wide">
+        {{ isEditing ? 'Save changes' : 'Create product' }}
+      </button>
     </form>
-
+  </div>
 </div>
