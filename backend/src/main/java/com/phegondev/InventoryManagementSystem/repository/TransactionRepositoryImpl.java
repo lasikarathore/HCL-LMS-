@@ -17,9 +17,9 @@ public class TransactionRepositoryImpl implements TransactionRepositoryCustom {
     private static final String BASE_WHERE = """
             FROM transactions t
             LEFT JOIN products p ON p.id = t.product_id
-            WHERE (:txType IS NULL OR CAST(:txType AS text) = '' OR CAST(t.transaction_type AS text) = CAST(:txType AS text))
+            WHERE (COALESCE(CAST(:txType AS text), '') = '' OR CAST(t.transaction_type AS text) = CAST(:txType AS text))
             AND (
-              :search IS NULL OR CAST(:search AS text) = ''
+              COALESCE(CAST(:search AS text), '') = ''
               OR LOWER(COALESCE(CAST(t.description AS text), '')) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%'))
               OR LOWER(COALESCE(CAST(p.name AS text), '')) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%'))
               OR LOWER(COALESCE(CAST(p.sku AS text), '')) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%'))
