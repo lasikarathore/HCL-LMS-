@@ -26,6 +26,7 @@ import { ApiService } from './service/api.service';
 export class AppComponent implements OnInit, OnDestroy {
   title = 'ims';
   shellVisible = true;
+  lowStockCount: number = 0;
   private sub?: Subscription;
 
   constructor(
@@ -52,6 +53,17 @@ export class AppComponent implements OnInit, OnDestroy {
       path === '/register' ||
       !this.apiService.isAuthenticated()
     );
+
+    if (this.shellVisible) {
+      this.apiService.getDashboardSummary().subscribe({
+        next: (res) => {
+          this.lowStockCount = res.dashboardSummary?.lowStockProductCount || 0;
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error('Error fetching dashboard summary:', err),
+      });
+    }
+
     this.cdr.detectChanges();
   }
 
