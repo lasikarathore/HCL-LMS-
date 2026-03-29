@@ -22,12 +22,12 @@ export class DashboardComponent implements OnInit {
 
   chartScheme = IMS_CHART_SCHEME;
   schemeType = ScaleType.Ordinal;
-  mainChartView: [number, number] = [720, 340];
-  donutView: [number, number] = [420, 400];
+  mainChartView: [number, number] = [720, 360];
+  donutView: [number, number] = [250, 300];
   donutLegendPosition = LegendPosition.Below;
 
   showLegend = true;
-  showLabels = true;
+  showLabels = false;
   animations = true;
 
   constructor(private apiService: ApiService) {}

@@ -42,13 +42,13 @@ export class TransactionComponent implements OnInit {
   chartScheme = IMS_CHART_SCHEME;
   schemeType = ScaleType.Ordinal;
   lineView: [number, number] = [720, 360];
-  donutView: [number, number] = [400, 380];
+  donutView: [number, number] = [250, 300];
   donutLegendPosition = LegendPosition.Below;
   dailyView: [number, number] = [700, 220];
   monthlyView: [number, number] = [920, 400];
   monthlyTrendView: [number, number] = [920, 300];
   showLegend = true;
-  showLabels = true;
+  showLabels = false;
   animations = true;
 
   months = [
