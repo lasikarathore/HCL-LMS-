@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../service/api.service';
 
 @Component({
@@ -11,7 +12,10 @@ import { ApiService } from '../service/api.service';
   styleUrl: './purchase.component.css',
 })
 export class PurchaseComponent implements OnInit {
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private route: ActivatedRoute
+  ) {}
 
   products: any[] = [];
   suppliers: any[] = [];
@@ -23,6 +27,12 @@ export class PurchaseComponent implements OnInit {
   recentPurchases: any[] = [];
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe((params) => {
+      const pid = params['product_id'];
+      if (pid != null && pid !== '') {
+        this.productId = String(pid);
+      }
+    });
     this.fetchProductsAndSuppliers();
     this.loadRecentPurchases();
   }

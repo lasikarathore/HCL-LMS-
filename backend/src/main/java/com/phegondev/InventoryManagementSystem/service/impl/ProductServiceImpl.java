@@ -44,14 +44,13 @@ public class ProductServiceImpl implements ProductService {
     @Value("${ims.low-stock-threshold:10}")
     private int lowStockThreshold;
 
-
     @Override
     public Response saveProduct(ProductDTO productDTO, MultipartFile imageFile) {
 
         Category category = categoryRepository.findById(productDTO.getCategoryId())
-                .orElseThrow(()-> new NotFoundException("Category Not Found"));
+                .orElseThrow(() -> new NotFoundException("Category Not Found"));
 
-        //map out product dto to product entity
+        // map out product dto to product entity
         Product productToSave = Product.builder()
                 .name(productDTO.getName())
                 .sku(productDTO.getSku())
@@ -61,12 +60,12 @@ public class ProductServiceImpl implements ProductService {
                 .category(category)
                 .build();
 
-        if (imageFile != null){
+        if (imageFile != null) {
             String imagePath = saveImageToFrontendPublicFolder(imageFile);
             productToSave.setImageUrl(imagePath);
         }
 
-        //save the product to our database
+        // save the product to our database
         productRepository.save(productToSave);
         return Response.builder()
                 .status(200)
@@ -78,44 +77,44 @@ public class ProductServiceImpl implements ProductService {
     public Response updateProduct(ProductDTO productDTO, MultipartFile imageFile) {
 
         Product existingProduct = productRepository.findById(productDTO.getProductId())
-                .orElseThrow(()-> new NotFoundException("Product Not Found"));
+                .orElseThrow(() -> new NotFoundException("Product Not Found"));
 
-        //check if image is associated with the update request
-        if (imageFile != null && !imageFile.isEmpty()){
+        // check if image is associated with the update request
+        if (imageFile != null && !imageFile.isEmpty()) {
             String imagePath = saveImageToFrontendPublicFolder(imageFile);
             existingProduct.setImageUrl(imagePath);
         }
-        //Check if category is to be changed for the product
-        if (productDTO.getCategoryId() != null && productDTO.getCategoryId() > 0){
+        // Check if category is to be changed for the product
+        if (productDTO.getCategoryId() != null && productDTO.getCategoryId() > 0) {
 
             Category category = categoryRepository.findById(productDTO.getCategoryId())
-                    .orElseThrow(()-> new NotFoundException("Category Not Found"));
+                    .orElseThrow(() -> new NotFoundException("Category Not Found"));
             existingProduct.setCategory(category);
         }
 
-        //check and update fiedls
+        // check and update fiedls
 
-        if (productDTO.getName() !=null && !productDTO.getName().isBlank()){
+        if (productDTO.getName() != null && !productDTO.getName().isBlank()) {
             existingProduct.setName(productDTO.getName());
         }
 
-        if (productDTO.getSku() !=null && !productDTO.getSku().isBlank()){
+        if (productDTO.getSku() != null && !productDTO.getSku().isBlank()) {
             existingProduct.setSku(productDTO.getSku());
         }
 
-        if (productDTO.getDescription() !=null && !productDTO.getDescription().isBlank()){
+        if (productDTO.getDescription() != null && !productDTO.getDescription().isBlank()) {
             existingProduct.setDescription(productDTO.getDescription());
         }
 
-        if (productDTO.getPrice() !=null && productDTO.getPrice().compareTo(BigDecimal.ZERO) >=0){
+        if (productDTO.getPrice() != null && productDTO.getPrice().compareTo(BigDecimal.ZERO) >= 0) {
             existingProduct.setPrice(productDTO.getPrice());
         }
 
-        if (productDTO.getStockQuantity() !=null && productDTO.getStockQuantity() >=0){
+        if (productDTO.getStockQuantity() != null && productDTO.getStockQuantity() >= 0) {
             existingProduct.setStockQuantity(productDTO.getStockQuantity());
         }
 
-        //Update the product
+        // Update the product
         productRepository.save(existingProduct);
         return Response.builder()
                 .status(200)
@@ -144,7 +143,7 @@ public class ProductServiceImpl implements ProductService {
     public Response getProductById(Long id) {
 
         Product product = productRepository.findById(id)
-                .orElseThrow(()-> new NotFoundException("Product Not Found"));
+                .orElseThrow(() -> new NotFoundException("Product Not Found"));
 
         return Response.builder()
                 .status(200)
@@ -173,7 +172,7 @@ public class ProductServiceImpl implements ProductService {
     public Response deleteProduct(Long id) {
 
         productRepository.findById(id)
-                .orElseThrow(()-> new NotFoundException("Product Not Found"));
+                .orElseThrow(() -> new NotFoundException("Product Not Found"));
 
         long refCount = transactionRepository.countByProduct_Id(id);
         if (refCount > 0) {
@@ -190,70 +189,60 @@ public class ProductServiceImpl implements ProductService {
                 .build();
     }
 
-    private String saveImageToFrontendPublicFolder(MultipartFile imageFile){
-        //validate image check
-        if (!imageFile.getContentType().startsWith("image/")){
+    private String saveImageToFrontendPublicFolder(MultipartFile imageFile) {
+        // validate image check
+        if (!imageFile.getContentType().startsWith("image/")) {
             throw new IllegalArgumentException("Only image files are allowed");
         }
         Path baseDir = Paths.get(System.getProperty("user.dir")).resolve(imagesRelativePath).normalize();
         File directory = baseDir.toFile();
 
-        if (!directory.exists()){
+        if (!directory.exists()) {
             directory.mkdirs();
             log.info("Directory was created");
         }
-        //generate unique file name for the image
+        // generate unique file name for the image
         String uniqueFileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
-        //get the absolute path of the image
+        // get the absolute path of the image
         String imagePath = baseDir + File.separator + uniqueFileName;
 
         try {
             File desctinationFile = new File(imagePath);
-            imageFile.transferTo(desctinationFile); //we are transfering(writing to this folder)
+            imageFile.transferTo(desctinationFile); // we are transfering(writing to this folder)
 
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new IllegalArgumentException("Error occurend while saving image" + e.getMessage());
         }
 
-        return "products/"+uniqueFileName;
+        return "products/" + uniqueFileName;
     }
 
-    private String saveImage(MultipartFile imageFile){
-        //validate image check
-        if (!imageFile.getContentType().startsWith("image/")){
+    private String saveImage(MultipartFile imageFile) {
+        // validate image check
+        if (!imageFile.getContentType().startsWith("image/")) {
             throw new IllegalArgumentException("Only image files are allowed");
         }
-        //create the directory to store images if it doesn't exist
+        // create the directory to store images if it doesn't exist
         File directory = new File(IMAGE_DIRECTORY);
 
-        if (!directory.exists()){
+        if (!directory.exists()) {
             directory.mkdir();
             log.info("Directory was created");
         }
-        //generate unique file name for the image
+        // generate unique file name for the image
         String uniqueFileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
-        //get the absolute path of the image
+        // get the absolute path of the image
         String imagePath = IMAGE_DIRECTORY + uniqueFileName;
 
         try {
             File desctinationFile = new File(imagePath);
-            imageFile.transferTo(desctinationFile); //we are transfering(writing to this folder)
+            imageFile.transferTo(desctinationFile); // we are transfering(writing to this folder)
 
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new IllegalArgumentException("Error occurend while saving image" + e.getMessage());
         }
 
         return imagePath;
     }
-
-
-
-
-
-
-
-
-
-
 
 }

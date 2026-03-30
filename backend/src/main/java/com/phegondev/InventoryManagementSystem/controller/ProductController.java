@@ -20,18 +20,16 @@ public class ProductController {
 
     private final ProductService productService;
 
-
     @PostMapping("/add")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> saveProduct(
             @RequestParam("imageFile") MultipartFile imageFile,
-            @RequestParam("name") String  name,
-            @RequestParam("sku") String  sku,
+            @RequestParam("name") String name,
+            @RequestParam("sku") String sku,
             @RequestParam("price") BigDecimal price,
-            @RequestParam("stockQuantity") Integer  stockQuantity,
-            @RequestParam("categoryId") Long  categoryId,
-            @RequestParam(value = "description", required = false) String  description
-            ) {
+            @RequestParam("stockQuantity") Integer stockQuantity,
+            @RequestParam("categoryId") Long categoryId,
+            @RequestParam(value = "description", required = false) String description) {
         ProductDTO productDTO = new ProductDTO();
 
         productDTO.setName(name);
@@ -43,21 +41,20 @@ public class ProductController {
 
         System.out.println(productDTO);
 
-
         return ResponseEntity.ok(productService.saveProduct(productDTO, imageFile));
     }
+
     @PutMapping("/update")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> updateProduct(
-            @RequestParam(value = "imageFile", required=false) MultipartFile imageFile,
-            @RequestParam(value = "name",required = false) String  name,
-            @RequestParam(value = "sku",required = false) String  sku,
-            @RequestParam(value = "price",required = false) BigDecimal price,
-            @RequestParam(value = "stockQuantity",required = false) Integer  stockQuantity,
-            @RequestParam(value = "productId",required = true) Long  productId,
-            @RequestParam(value = "categoryId",required = false) Long  categoryId,
-            @RequestParam(value = "description", required = false) String  description
-    ) {
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "sku", required = false) String sku,
+            @RequestParam(value = "price", required = false) BigDecimal price,
+            @RequestParam(value = "stockQuantity", required = false) Integer stockQuantity,
+            @RequestParam(value = "productId", required = true) Long productId,
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "description", required = false) String description) {
         ProductDTO productDTO = new ProductDTO();
 
         productDTO.setName(name);
@@ -75,17 +72,16 @@ public class ProductController {
     public ResponseEntity<Response> getAllProducts() {
         return ResponseEntity.ok(productService.getAllProducts());
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<Response> getProductById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getProductById(id));
     }
-
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Response> deleteProduct(@PathVariable Long id) {
         return ResponseEntity.ok(productService.deleteProduct(id));
     }
-
 
 }

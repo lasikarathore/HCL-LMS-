@@ -42,7 +42,7 @@ public class Product {
 
     private LocalDateTime expiryDate;
 
-    private  LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     private final LocalDateTime createdAt = LocalDateTime.now();
 

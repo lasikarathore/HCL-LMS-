@@ -12,19 +12,19 @@ import java.util.List;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Response {
-    //generic
+    // generic
     private int status;
     private String message;
-    //for login
+    // for login
     private String token;
     private UserRole role;
     private String expirationTime;
 
-    //for pagination
+    // for pagination
     private Integer totalPages;
     private Long totalElements;
 
-    //data output optional
+    // data output optional
     private UserDTO user;
     private List<UserDTO> users;
 
@@ -45,12 +45,5 @@ public class Response {
     private TransactionAnalyticsDTO transactionAnalytics;
 
     private final LocalDateTime timestamp = LocalDateTime.now();
-
-
-
-
-
-
-
 
 }

@@ -16,20 +16,20 @@ export class AddEditProductComponent implements OnInit {
     private apiService: ApiService,
     private route: ActivatedRoute,
     private router: Router
-  ){}
+  ) { }
 
   productId: string | null = null
-  name:string = ''
-  sku:string = ''
-  price:string = ''
-  stockQuantity:string = ''
-  categoryId:string = ''
-  description:string = ''
-  imageFile:File | null = null
-  imageUrl:string = ''
-  isEditing:boolean = false
-  categories:any[] = []
-  message:string = ''
+  name: string = ''
+  sku: string = ''
+  price: string = ''
+  stockQuantity: string = ''
+  categoryId: string = ''
+  description: string = ''
+  imageFile: File | null = null
+  imageUrl: string = ''
+  isEditing: boolean = false
+  categories: any[] = []
+  message: string = ''
 
 
 
@@ -44,24 +44,25 @@ export class AddEditProductComponent implements OnInit {
 
 
   //GET ALL CATEGORIES
-  fetchCategories():void{
+  fetchCategories(): void {
     this.apiService.getAllCategory().subscribe({
-      next:(res:any) =>{
+      next: (res: any) => {
         if (res.status === 200) {
           this.categories = res.categories
         }
       },
-      error:(error) =>{
+      error: (error) => {
         this.showMessage(error?.error?.message || error?.message || "Unable to get all categories" + error)
-      }})
+      }
+    })
   }
 
 
   //GET CATEGORY BY ID
 
-  fetchProductById(productId: string):void{
+  fetchProductById(productId: string): void {
     this.apiService.getProductById(productId).subscribe({
-      next:(res:any) =>{
+      next: (res: any) => {
         if (res.status === 200) {
           const product = res.product;
           this.name = product.name;
@@ -72,28 +73,29 @@ export class AddEditProductComponent implements OnInit {
           this.description = product.description;
           this.imageUrl =
             ApiService.resolvePublicAsset(product.imageUrl) ?? product.imageUrl ?? '';
-        }else{
+        } else {
           this.showMessage(res.message);
         }
       },
-      error:(error) =>{
+      error: (error) => {
         this.showMessage(error?.error?.message || error?.message || "Unable to get all categories" + error)
-      }})
+      }
+    })
   }
 
-  handleImageChange(event: Event):void{
+  handleImageChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input?.files?.[0]) {
       this.imageFile = input.files[0]
       const reader = new FileReader();
-      reader.onloadend = () =>{
+      reader.onloadend = () => {
         this.imageUrl = reader.result as string
       }
       reader.readAsDataURL(this.imageFile);
     }
   }
 
-  handleSubmit(event : Event):void{
+  handleSubmit(event: Event): void {
     event.preventDefault()
     const formData = new FormData();
     formData.append("name", this.name);
@@ -110,26 +112,28 @@ export class AddEditProductComponent implements OnInit {
     if (this.isEditing) {
       formData.append("productId", this.productId!);
       this.apiService.updateProduct(formData).subscribe({
-        next:(res:any) =>{
+        next: (res: any) => {
           if (res.status === 200) {
             this.showMessage("product updated successfully")
             this.router.navigate(['/product'])
           }
         },
-        error:(error) =>{
+        error: (error) => {
           this.showMessage(error?.error?.message || error?.message || "Unable to update a product" + error)
-        }})
-    }else{
+        }
+      })
+    } else {
       this.apiService.addProduct(formData).subscribe({
-        next:(res:any) =>{
+        next: (res: any) => {
           if (res.status === 200) {
             this.showMessage("Product Saved successfully")
             this.router.navigate(['/product'])
           }
         },
-        error:(error) =>{
+        error: (error) => {
           this.showMessage(error?.error?.message || error?.message || "Unable to save a product" + error)
-        }})
+        }
+      })
 
     }
 
@@ -140,9 +144,9 @@ export class AddEditProductComponent implements OnInit {
 
 
 
-  showMessage(message:string){
+  showMessage(message: string) {
     this.message = message;
-    setTimeout(() =>{
+    setTimeout(() => {
       this.message = ''
     }, 4000)
   }

@@ -28,29 +28,29 @@ export class ApiService {
   }
 
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-    // Encrypt data and save to localStorage
-    encryptAndSaveToStorage(key: string, value: string): void {
-      const encryptedValue = CryptoJS.AES.encrypt(value, ApiService.ENCRYPTION_KEY).toString();
-      localStorage.setItem(key, encryptedValue);
-    }
-  
-    // Retreive from localStorage and Decrypt
-    private getFromStorageAndDecrypt(key: string): any {
-      try {
-        const encryptedValue = localStorage.getItem(key);
-        if (!encryptedValue) return null;
-        return CryptoJS.AES.decrypt(encryptedValue, ApiService.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
-      } catch (error) {
-        return null;
-      }
-    }
+  // Encrypt data and save to localStorage
+  encryptAndSaveToStorage(key: string, value: string): void {
+    const encryptedValue = CryptoJS.AES.encrypt(value, ApiService.ENCRYPTION_KEY).toString();
+    localStorage.setItem(key, encryptedValue);
+  }
 
-    
+  // Retreive from localStorage and Decrypt
+  private getFromStorageAndDecrypt(key: string): any {
+    try {
+      const encryptedValue = localStorage.getItem(key);
+      if (!encryptedValue) return null;
+      return CryptoJS.AES.decrypt(encryptedValue, ApiService.ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+      return null;
+    }
+  }
+
+
   private clearAuth() {
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
   }
 
 
@@ -282,7 +282,7 @@ export class ApiService {
     });
   }
 
-  
+
   updateTransactionStatus(id: string, status: string): Observable<any> {
     return this.http.put(`${ApiService.BASE_URL}/transactions/update/${id}`, JSON.stringify(status), {
       headers: this.getHeader().set("Content-Type", "application/json")
@@ -300,6 +300,18 @@ export class ApiService {
     });
   }
 
+  /** Stock alerts (active alerts only) */
+  getActiveAlertsCount(): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/alerts/count`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  getActiveAlerts(): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/alerts`, {
+      headers: this.getHeader(),
+    });
+  }
 
 
 
@@ -311,18 +323,19 @@ export class ApiService {
 
 
 
-/**AUTHENTICATION CHECKER */
-    
-  logout():void{
+
+  /**AUTHENTICATION CHECKER */
+
+  logout(): void {
     this.clearAuth()
   }
 
-  isAuthenticated():boolean{
+  isAuthenticated(): boolean {
     const token = this.getFromStorageAndDecrypt("token");
     return !!token;
   }
 
-  isAdmin():boolean {
+  isAdmin(): boolean {
     const role = this.getFromStorageAndDecrypt("role");
     return role === "ADMIN";
   }

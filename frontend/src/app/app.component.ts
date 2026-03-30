@@ -27,13 +27,15 @@ export class AppComponent implements OnInit, OnDestroy {
   title = 'ims';
   shellVisible = true;
   lowStockCount: number = 0;
+  activeAlertCount: number = 0;
   private sub?: Subscription;
+  private alertPollHandle?: ReturnType<typeof setInterval>;
 
   constructor(
     private apiService: ApiService,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.sub = this.router.events
@@ -44,6 +46,32 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+    this.stopAlertPolling();
+  }
+
+  private startAlertPolling(): void {
+    this.stopAlertPolling();
+    const tick = () => {
+      this.apiService.getActiveAlertsCount().subscribe({
+        next: (res: any) => {
+          this.activeAlertCount = Number(res?.alertCount ?? 0) || 0;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          // Keep silent during polling.
+        },
+      });
+    };
+
+    tick();
+    this.alertPollHandle = setInterval(tick, 10000);
+  }
+
+  private stopAlertPolling(): void {
+    if (this.alertPollHandle) {
+      clearInterval(this.alertPollHandle);
+      this.alertPollHandle = undefined;
+    }
   }
 
   private refreshShell(): void {
@@ -62,6 +90,10 @@ export class AppComponent implements OnInit, OnDestroy {
         },
         error: (err) => console.error('Error fetching dashboard summary:', err),
       });
+      this.startAlertPolling();
+    } else {
+      this.activeAlertCount = 0;
+      this.stopAlertPolling();
     }
 
     this.cdr.detectChanges();

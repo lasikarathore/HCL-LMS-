@@ -13,35 +13,38 @@ import { TransactionComponent } from './transaction/transaction.component';
 import { TransactionDetailsComponent } from './transaction-details/transaction-details.component';
 import { ProfileComponent } from './profile/profile.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { StockAlertsComponent } from './stock-alerts/stock-alerts.component';
 
 export const routes: Routes = [
 
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
 
-  { path: 'category', component: CategoryComponent, canActivate:[GuardService], data: {requiresAdmin: true} },
+  { path: 'category', component: CategoryComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
 
-  { path: 'supplier', component: SupplierComponent, canActivate:[GuardService], data: {requiresAdmin: true} },
-  { path: 'edit-supplier/:supplierId', component: AddEditSupplierComponent, canActivate:[GuardService], data: {requiresAdmin: true} },
-  { path: 'add-supplier', component: AddEditSupplierComponent, canActivate:[GuardService], data: {requiresAdmin: true} },
+  { path: 'supplier', component: SupplierComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
+  { path: 'edit-supplier/:supplierId', component: AddEditSupplierComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
+  { path: 'add-supplier', component: AddEditSupplierComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
 
-  { path: 'product', component: ProductComponent, canActivate:[GuardService], data: {requiresAdmin: true} },
-  { path: 'edit-product/:productId', component: AddEditProductComponent, canActivate:[GuardService], data: {requiresAdmin: true} },
-  { path: 'add-product', component: AddEditProductComponent, canActivate:[GuardService], data: {requiresAdmin: true} },
-
-
-  { path: 'purchase', component: PurchaseComponent, canActivate:[GuardService] },
-  { path: 'sell', component: SellComponent, canActivate:[GuardService] },
-
-  { path: 'transaction', component: TransactionComponent, canActivate:[GuardService] },
-  { path: 'transaction/:transactionId', component: TransactionDetailsComponent, canActivate:[GuardService] },
+  { path: 'product', component: ProductComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
+  { path: 'edit-product/:productId', component: AddEditProductComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
+  { path: 'add-product', component: AddEditProductComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
 
 
-  { path: 'profile', component: ProfileComponent, canActivate:[GuardService] },
-  { path: 'dashboard', component: DashboardComponent, canActivate:[GuardService] },
+  { path: 'purchase', component: PurchaseComponent, canActivate: [GuardService] },
+  { path: 'purchase-orders', component: PurchaseComponent, canActivate: [GuardService] },
+  { path: 'sell', component: SellComponent, canActivate: [GuardService] },
 
-//   WIDE CARD
-    {path: "", redirectTo: "/login", pathMatch: 'full'},
-    // {path: "**", redirectTo: "/dashboard"}
+  { path: 'transaction', component: TransactionComponent, canActivate: [GuardService] },
+  { path: 'transaction/:transactionId', component: TransactionDetailsComponent, canActivate: [GuardService] },
+
+
+  { path: 'profile', component: ProfileComponent, canActivate: [GuardService] },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [GuardService] },
+  { path: 'stock-alerts', component: StockAlertsComponent, canActivate: [GuardService] },
+
+  //   WIDE CARD
+  { path: "", redirectTo: "/login", pathMatch: 'full' },
+  // {path: "**", redirectTo: "/dashboard"}
 
 ];

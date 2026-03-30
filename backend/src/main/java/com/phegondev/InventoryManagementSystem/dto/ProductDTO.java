@@ -36,12 +36,11 @@ public class ProductDTO {
 
     private LocalDateTime expiryDate;
 
-    private  LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     private LocalDateTime createdAt;
 
     /** Derived from {@code ims.low-stock-threshold}: LOW, MEDIUM, or OK */
     private String stockLevel;
-
 
 }
