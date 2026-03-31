@@ -44,6 +44,43 @@ public class Response {
 
     private TransactionAnalyticsDTO transactionAnalytics;
 
+    // Stock alerts
+    private Integer alertCount;
+    private List<StockAlertDTO> alerts;
+
+    // Purchase Orders
+    private PurchaseOrderDTO purchaseOrder;
+    private List<PurchaseOrderDTO> purchaseOrders;
+    private Long poTotal;
+    private Long poPending;
+    private Long poApproved;
+    private Long poReceived;
+
+    // Supplier management
+    private List<SupplierManagementDTO> supplierManagement;
+    private SupplierManagementDTO supplierTopPerformer;
+    private SupplierManagementDTO supplierNeedsAttention;
+    private Long supplierTotal;
+    private Double supplierAvgRating;
+    private Double supplierAvgOnTime;
+    private java.math.BigDecimal supplierTotalPurchaseValue;
+
+    // Analytics (simple payloads for new UI)
+    private java.math.BigDecimal revenue;
+    private java.math.BigDecimal grossProfit;
+    private Integer grossMargin;
+    private java.math.BigDecimal inventoryValue;
+    private Double turnoverRate;
+    private Double industryAvg;
+    private List<java.util.Map<String, Object>> trend;
+    private List<java.util.Map<String, Object>> analyticsCategories;
+    private List<java.util.Map<String, Object>> rows;
+    private List<java.util.Map<String, Object>> analyticsSuppliers;
+    private String insight;
+
+    // Identifiers for create/update operations
+    private Long supplierId;
+
     private final LocalDateTime timestamp = LocalDateTime.now();
 
 }

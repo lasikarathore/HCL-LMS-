@@ -313,6 +313,73 @@ export class ApiService {
     });
   }
 
+  /** Purchase Orders */
+  getPurchaseOrderSummary(): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/purchase-orders/summary`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  getPurchaseOrders(status: string): Observable<any> {
+    const params: any = {};
+    if (status && status !== 'ALL') params.status = status;
+    return this.http.get(`${ApiService.BASE_URL}/purchase-orders`, {
+      headers: this.getHeader(),
+      params,
+    });
+  }
+
+  createPurchaseOrder(body: any): Observable<any> {
+    return this.http.post(`${ApiService.BASE_URL}/purchase-orders`, body, {
+      headers: this.getHeader(),
+    });
+  }
+
+  approvePurchaseOrder(id: string): Observable<any> {
+    return this.http.put(`${ApiService.BASE_URL}/purchase-orders/${id}/approve`, null, {
+      headers: this.getHeader(),
+    });
+  }
+
+  receivePurchaseOrder(id: string): Observable<any> {
+    return this.http.put(`${ApiService.BASE_URL}/purchase-orders/${id}/receive`, null, {
+      headers: this.getHeader(),
+    });
+  }
+
+  /** Supplier management (enhanced supplier screen) */
+  getSupplierManagementSummary(): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/suppliers/management/summary`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  getSupplierManagementAll(): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/suppliers/management/all`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  upsertSupplierManagement(body: any): Observable<any> {
+    return this.http.post(`${ApiService.BASE_URL}/suppliers/management/upsert`, body, {
+      headers: this.getHeader(),
+    });
+  }
+
+  getSupplierManagementById(id: string | number): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/suppliers/management/${id}`, {
+      headers: this.getHeader(),
+    });
+  }
+
+  /** Reports & Analytics */
+  getAnalyticsSummary(range: string): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/analytics/summary`, {
+      headers: this.getHeader(),
+      params: { range },
+    });
+  }
+
 
 
 

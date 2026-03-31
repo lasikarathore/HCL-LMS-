@@ -14,6 +14,8 @@ import { TransactionDetailsComponent } from './transaction-details/transaction-d
 import { ProfileComponent } from './profile/profile.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { StockAlertsComponent } from './stock-alerts/stock-alerts.component';
+import { PurchaseOrdersComponent } from './purchase-orders/purchase-orders.component';
+import { AnalyticsComponent } from './analytics/analytics.component';
 
 export const routes: Routes = [
 
@@ -22,7 +24,8 @@ export const routes: Routes = [
 
   { path: 'category', component: CategoryComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
 
-  { path: 'supplier', component: SupplierComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
+  { path: 'supplier', redirectTo: '/suppliers', pathMatch: 'full' },
+  { path: 'suppliers', component: SupplierComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
   { path: 'edit-supplier/:supplierId', component: AddEditSupplierComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
   { path: 'add-supplier', component: AddEditSupplierComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
 
@@ -31,8 +34,8 @@ export const routes: Routes = [
   { path: 'add-product', component: AddEditProductComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
 
 
+  { path: 'purchase-orders', component: PurchaseOrdersComponent, canActivate: [GuardService] },
   { path: 'purchase', component: PurchaseComponent, canActivate: [GuardService] },
-  { path: 'purchase-orders', component: PurchaseComponent, canActivate: [GuardService] },
   { path: 'sell', component: SellComponent, canActivate: [GuardService] },
 
   { path: 'transaction', component: TransactionComponent, canActivate: [GuardService] },
@@ -42,6 +45,7 @@ export const routes: Routes = [
   { path: 'profile', component: ProfileComponent, canActivate: [GuardService] },
   { path: 'dashboard', component: DashboardComponent, canActivate: [GuardService] },
   { path: 'stock-alerts', component: StockAlertsComponent, canActivate: [GuardService] },
+  { path: 'analytics', component: AnalyticsComponent, canActivate: [GuardService] },
 
   //   WIDE CARD
   { path: "", redirectTo: "/login", pathMatch: 'full' },

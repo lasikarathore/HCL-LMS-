@@ -3,68 +3,111 @@
 
   <header class="ims-page-head">
     <div>
-      <h1 class="ims-page-title">Suppliers</h1>
-      <p class="ims-page-sub">Vendor directory and quick KPIs</p>
+      <h1 class="ims-page-title">Supplier Management</h1>
+      <p class="ims-page-sub">Performance ratings · On-time delivery · Vendor analytics</p>
     </div>
     <button
       type="button"
       class="ims-btn ims-btn-primary"
       (click)="navigateToAddSupplierPage()"
     >
-      Add supplier
+      Add Supplier
     </button>
   </header>
 
-  <div class="sup-kpis" *ngIf="suppliers.length">
+  <section class="sup-kpis" *ngIf="summary">
     <article class="kpi-mini ims-card pastel-sky">
-      <span class="kpi-mini-label">Total suppliers</span>
-      <strong>{{ suppliers.length }}</strong>
+      <span class="kpi-mini-label">Total Suppliers</span>
+      <strong>{{ summary.supplierTotal || 0 }}</strong>
+    </article>
+    <article class="kpi-mini ims-card pastel-lilac">
+      <span class="kpi-mini-label">Avg Rating</span>
+      <strong>{{ (summary.supplierAvgRating || 0) | number : '1.1-1' }}★</strong>
     </article>
     <article class="kpi-mini ims-card pastel-mint">
-      <span class="kpi-mini-label">With address on file</span>
-      <strong>{{ withAddressCount }}</strong>
+      <span class="kpi-mini-label">On-Time Delivery %</span>
+      <strong>{{ (summary.supplierAvgOnTime || 0) | number : '1.0-0' }}%</strong>
     </article>
-  </div>
+    <article class="kpi-mini ims-card pastel-lemon">
+      <span class="kpi-mini-label">Total Purchase Value</span>
+      <strong>{{ summary.supplierTotalPurchaseValue | currency : 'INR' : 'symbol' : '1.0-0' }}</strong>
+    </article>
+  </section>
 
-  <div class="sup-table-wrap ims-card" *ngIf="suppliers.length > 0">
+  <section class="sup-panels" *ngIf="summary">
+    <div class="ims-card perf-panel top">
+      <h2 class="panel-h2">Top Performer</h2>
+      <p class="panel-sub">Best performing supplier this period</p>
+      <div *ngIf="summary.supplierTopPerformer as t">
+        <div class="perf-title">{{ t.name }}</div>
+        <div class="perf-metric">
+          <span>On-Time Delivery</span><strong>{{ t.onTimeDeliveryPercent || 0 }}%</strong>
+        </div>
+        <div class="track"><div class="fill green" [style.width.%]="t.onTimeDeliveryPercent || 0"></div></div>
+        <div class="perf-metric">
+          <span>Quality Score</span><strong>{{ t.qualityScorePercent || 85 }}%</strong>
+        </div>
+        <div class="track"><div class="fill green" [style.width.%]="t.qualityScorePercent || 85"></div></div>
+        <div class="perf-metric">
+          <span>Response Time</span><strong>{{ t.responseTimeHours || 12 }}h</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="ims-card perf-panel risk">
+      <h2 class="panel-h2">Needs Attention</h2>
+      <p class="panel-sub">Worst performer · Consider alternative supplier</p>
+      <div *ngIf="summary.supplierNeedsAttention as w">
+        <div class="perf-title">{{ w.name }}</div>
+        <div class="perf-metric">
+          <span>On-Time Delivery</span><strong>{{ w.onTimeDeliveryPercent || 0 }}%</strong>
+        </div>
+        <div class="track"><div class="fill red" [style.width.%]="w.onTimeDeliveryPercent || 0"></div></div>
+        <div class="perf-metric">
+          <span>Quality Score</span><strong>{{ w.qualityScorePercent || 65 }}%</strong>
+        </div>
+        <div class="track"><div class="fill red" [style.width.%]="w.qualityScorePercent || 65"></div></div>
+        <p class="warn">Consider alternative supplier</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sup-table-wrap ims-card" *ngIf="suppliers.length">
     <table class="sup-table">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Address</th>
+          <th>#</th>
+          <th>Supplier</th>
+          <th>Star Rating</th>
+          <th>On-Time %</th>
+          <th>Items Supplied</th>
           <th>Status</th>
           <th></th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let supplier of suppliers">
-          <td class="sup-name">{{ supplier.name }}</td>
-          <td>{{ supplier.address || '—' }}</td>
+        <tr *ngFor="let s of suppliers; let i = index">
+          <td class="muted">{{ i + 1 }}</td>
           <td>
-            <span class="ims-pill ims-pill-ok">{{
-              supplier.address ? 'Complete' : 'Basic'
-            }}</span>
+            <div class="sup-name">{{ s.name }}</div>
+            <div class="sup-email">{{ s.email || '—' }}</div>
+          </td>
+          <td class="mono">{{ stars(s.starRating || 0) }}</td>
+          <td class="mono">{{ s.onTimeDeliveryPercent || 0 }}%</td>
+          <td class="mono">{{ s.itemsSupplied || 0 }}</td>
+          <td>
+            <span class="ims-pill" [ngClass]="s.active === false ? 'pill-inactive' : 'pill-active'">
+              {{ s.active === false ? 'Inactive' : 'Active' }}
+            </span>
           </td>
           <td class="sup-actions">
-            <button
-              type="button"
-              class="ims-btn ims-btn-ghost"
-              (click)="navigateToEditSupplierPage(supplier.id)"
-            >
-              Edit
-            </button>
-            <button
-              type="button"
-              class="ims-btn ims-btn-danger"
-              (click)="handleDeleteSupplier(supplier.id)"
-            >
-              Delete
-            </button>
+            <button type="button" class="ims-btn ims-btn-ghost" (click)="navigateToEditSupplierPage(s.id)">View</button>
+            <button type="button" class="ims-btn ims-btn-danger" (click)="handleDeleteSupplier(s.id)">Delete</button>
           </td>
         </tr>
       </tbody>
     </table>
-  </div>
+  </section>
 
   <p *ngIf="!suppliers.length && !message" class="empty-state ims-card">
     No suppliers yet. Register your first vendor.

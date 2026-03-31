@@ -9,13 +9,10 @@
   padding: 18px 20px;
 }
 
-.kpi-mini.pastel-sky {
-  background: linear-gradient(145deg, #dbeaf5, #e8f2fa);
-}
-
-.kpi-mini.pastel-mint {
-  background: linear-gradient(145deg, #d4ebe3, #e5f4ee);
-}
+.kpi-mini.pastel-sky { background: linear-gradient(145deg, #dbeaf5, #e8f2fa); }
+.kpi-mini.pastel-mint { background: linear-gradient(145deg, #d4ebe3, #e5f4ee); }
+.kpi-mini.pastel-lemon { background: linear-gradient(145deg, #f5f0d6, #fbf7e6); }
+.kpi-mini.pastel-lilac { background: linear-gradient(145deg, #e6e0f4, #f0ecfb); }
 
 .kpi-mini-label {
   display: block;
@@ -59,7 +56,14 @@
 }
 
 .sup-name {
-  font-weight: 600;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.sup-email {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--ims-text-muted);
 }
 
 .sup-actions {
@@ -77,4 +81,100 @@
   padding: 48px;
   text-align: center;
   color: var(--ims-text-muted);
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.muted {
+  color: var(--ims-text-muted);
+  font-size: 13px;
+}
+
+.sup-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+@media (max-width: 980px) {
+  .sup-panels { grid-template-columns: 1fr; }
+}
+
+.perf-panel {
+  padding: 18px;
+}
+
+.perf-panel.top {
+  background: linear-gradient(145deg, rgba(212, 235, 227, 0.9), rgba(255, 255, 255, 0.75));
+  border-color: rgba(45, 90, 69, 0.18);
+}
+
+.perf-panel.risk {
+  background: linear-gradient(145deg, rgba(253, 232, 228, 0.9), rgba(255, 255, 255, 0.75));
+  border-color: rgba(183, 28, 28, 0.18);
+}
+
+.panel-h2 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 900;
+  margin: 0 0 6px;
+}
+
+.panel-sub {
+  margin: 0 0 12px;
+  color: var(--ims-text-muted);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.perf-title {
+  font-weight: 900;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+
+.perf-metric {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 800;
+  margin: 10px 0 6px;
+  color: #334155;
+}
+
+.track {
+  height: 10px;
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.fill.green { background: #2d5a45; }
+.fill.red { background: #b71c1c; }
+
+.warn {
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #b71c1c;
+}
+
+.pill-active {
+  background: var(--ims-pastel-mint);
+  color: #2d5a45;
+}
+
+.pill-inactive {
+  background: var(--ims-pastel-peach);
+  color: #922b2b;
 }

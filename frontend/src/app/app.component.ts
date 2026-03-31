@@ -28,6 +28,7 @@ export class AppComponent implements OnInit, OnDestroy {
   shellVisible = true;
   lowStockCount: number = 0;
   activeAlertCount: number = 0;
+  poPendingCount: number = 0;
   private sub?: Subscription;
   private alertPollHandle?: ReturnType<typeof setInterval>;
 
@@ -90,9 +91,19 @@ export class AppComponent implements OnInit, OnDestroy {
         },
         error: (err) => console.error('Error fetching dashboard summary:', err),
       });
+
+      this.apiService.getPurchaseOrderSummary().subscribe({
+        next: (res: any) => {
+          this.poPendingCount = Number(res?.poPending ?? 0) || 0;
+          this.cdr.detectChanges();
+        },
+        error: () => {},
+      });
+
       this.startAlertPolling();
     } else {
       this.activeAlertCount = 0;
+      this.poPendingCount = 0;
       this.stopAlertPolling();
     }
 

@@ -21,6 +21,7 @@ export class PurchaseComponent implements OnInit {
   suppliers: any[] = [];
   productId = '';
   supplierId = '';
+  poId = '';
   description = '';
   quantity = '';
   message = '';
@@ -31,6 +32,22 @@ export class PurchaseComponent implements OnInit {
       const pid = params['product_id'];
       if (pid != null && pid !== '') {
         this.productId = String(pid);
+      }
+      const sid = params['supplier_id'];
+      if (sid != null && sid !== '') {
+        this.supplierId = String(sid);
+      }
+      const poid = params['po_id'];
+      if (poid != null && poid !== '') {
+        this.poId = String(poid);
+      }
+      const qty = params['quantity'];
+      if (qty != null && qty !== '') {
+        this.quantity = String(qty);
+      }
+      const desc = params['description'];
+      if (desc != null && desc !== '') {
+        this.description = String(desc);
       }
     });
     this.fetchProductsAndSuppliers();
@@ -104,8 +121,17 @@ export class PurchaseComponent implements OnInit {
       next: (res: any) => {
         if (res.status === 200) {
           this.showMessage(res.message);
+          // If this purchase is completing a PO receive flow, mark the PO as RECEIVED.
+          const maybePo = this.poId;
           this.resetForm();
           this.loadRecentPurchases();
+
+          if (maybePo) {
+            this.apiService.receivePurchaseOrder(maybePo).subscribe({
+              next: () => {},
+              error: () => {},
+            });
+          }
         }
       },
       error: (error) => {
@@ -121,6 +147,7 @@ export class PurchaseComponent implements OnInit {
   resetForm(): void {
     this.productId = '';
     this.supplierId = '';
+    this.poId = '';
     this.description = '';
     this.quantity = '';
   }

@@ -62,7 +62,7 @@
           </svg>
           <span>Category</span>
         </a>
-        <a routerLink="/supplier" routerLinkActive="active" *ngIf="isAdmin()">
+        <a routerLink="/suppliers" routerLinkActive="active">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <circle cx="12" cy="12" r="10" />
@@ -73,6 +73,17 @@
         </a>
 
         <div class="ims-nav-section">OPERATIONS</div>
+        <a routerLink="/purchase-orders" routerLinkActive="active" class="ims-nav-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
+            <path d="M7 7h10" />
+            <path d="M7 12h10" />
+            <path d="M7 17h10" />
+            <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+          </svg>
+          <span>Purchase Orders</span>
+          <span class="ims-badge ims-badge-new">New</span>
+        </a>
         <a routerLink="/purchase" routerLinkActive="active">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
@@ -80,7 +91,7 @@
             <path d="M12 8v8" />
             <path d="M8 12h8" />
           </svg>
-          <span>Purchase</span>
+          <span>Receive Stock</span>
         </a>
         <a routerLink="/sell" routerLinkActive="active">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -89,6 +100,17 @@
             <circle cx="12" cy="12" r="2" />
           </svg>
           <span>Sell</span>
+        </a>
+
+        <div class="ims-nav-section">ANALYTICS</div>
+        <a routerLink="/analytics" routerLinkActive="active" class="ims-nav-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
+            <path d="M3 3v18h18" />
+            <path d="M7 14l3-3 4 4 6-6" />
+          </svg>
+          <span>Reports & Analytics</span>
+          <span class="ims-badge ims-badge-new">NEW</span>
         </a>
 
         <div class="ims-nav-section">ACCOUNT</div>
@@ -115,6 +137,24 @@
       </div>
     </aside>
     <main class="ims-main">
+      <div class="ims-topbar">
+        <div class="ims-topbar-left">
+          <div class="ims-search">
+            <input class="ims-search-input" type="text" placeholder="Search products, suppliers, POs..." />
+            <button type="button" class="ims-btn ims-btn-ghost ims-filter-btn">Filters</button>
+          </div>
+        </div>
+        <div class="ims-topbar-right">
+          <a routerLink="/stock-alerts" class="ims-bell-link" aria-label="Stock alerts">
+            <svg class="ims-bell-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            <span class="ims-badge ims-bell-badge" *ngIf="activeAlertCount > 0">{{ activeAlertCount }}</span>
+          </a>
+        </div>
+      </div>
       <router-outlet />
     </main>
   </div>

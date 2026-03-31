@@ -13,21 +13,36 @@ import { Router } from '@angular/router';
 export class SupplierComponent implements OnInit {
   constructor(private apiService: ApiService, private router: Router) {}
   suppliers: any[] = [];
+  summary: any = null;
   message: string = '';
 
-  get withAddressCount(): number {
-    return this.suppliers.filter((s) => !!s.address?.trim()).length;
+  stars(r: number): string {
+    const n = Math.round(Number(r || 0));
+    const full = Math.max(0, Math.min(5, n));
+    return '★★★★★'.slice(0, full) + '☆☆☆☆☆'.slice(0, 5 - full);
   }
 
   ngOnInit(): void {
+    this.loadSummary();
     this.getSuppliers();
   }
 
-  getSuppliers(): void {
-    this.apiService.getAllSuppliers().subscribe({
+  loadSummary(): void {
+    this.apiService.getSupplierManagementSummary().subscribe({
       next: (res: any) => {
-        if (res.status === 200) {
-          this.suppliers = res.suppliers;
+        const ok = res?.status === 200 || res?.status === '200';
+        this.summary = ok ? res : null;
+      },
+      error: () => (this.summary = null),
+    });
+  }
+
+  getSuppliers(): void {
+    this.apiService.getSupplierManagementAll().subscribe({
+      next: (res: any) => {
+        const ok = res?.status === 200 || res?.status === '200';
+        if (ok) {
+          this.suppliers = res.supplierManagement || [];
         } else {
           this.showMessage(res.message);
         }
@@ -59,7 +74,8 @@ export class SupplierComponent implements OnInit {
         next:(res:any) =>{
           if (res.status === 200) {
             this.showMessage("Supplier deleted successfully")
-            this.getSuppliers(); //reload the category
+            this.loadSummary();
+            this.getSuppliers(); //reload the suppliers
           }
         },
         error:(error) =>{

@@ -1,0 +1,152 @@
+<div class="ims-page po-page">
+  <p *ngIf="message" class="ims-toast ims-error">{{ message }}</p>
+
+  <header class="ims-page-head po-head">
+    <div>
+      <h1 class="ims-page-title">Purchase Orders</h1>
+      <p class="ims-page-sub">
+        Plan procurement · Submit for approval · Track status
+      </p>
+    </div>
+    <button
+      type="button"
+      class="ims-btn ims-btn-primary"
+      (click)="creating = !creating"
+    >
+      Create New PO
+    </button>
+  </header>
+
+  <section class="po-kpis">
+    <article class="kpi ims-card pastel-sky">
+      <span class="kpi-label">Total POs</span>
+      <strong>{{ summary?.poTotal ?? 0 }}</strong>
+    </article>
+    <article class="kpi ims-card pastel-lemon">
+      <span class="kpi-label">Pending Approval</span>
+      <strong>{{ summary?.poPending ?? 0 }}</strong>
+    </article>
+    <article class="kpi ims-card pastel-mint">
+      <span class="kpi-label">Approved</span>
+      <strong>{{ summary?.poApproved ?? 0 }}</strong>
+    </article>
+    <article class="kpi ims-card pastel-lilac">
+      <span class="kpi-label">Received</span>
+      <strong>{{ summary?.poReceived ?? 0 }}</strong>
+    </article>
+  </section>
+
+  <section class="ims-card po-create" *ngIf="creating">
+    <div class="po-create-head">
+      <h2>Create purchase order</h2>
+      <p>Submit a single-line PO for approval (product × qty)</p>
+    </div>
+    <form class="po-form" (ngSubmit)="submitPo()">
+      <div class="grid">
+        <div>
+          <label class="ims-label">Supplier</label>
+          <select class="ims-select" [(ngModel)]="form.supplierId" name="supplierId" required>
+            <option value="">Select supplier</option>
+            <option *ngFor="let s of suppliers" [value]="s.id">{{ s.name }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="ims-label">Required by</label>
+          <input class="ims-input" type="date" [(ngModel)]="form.requiredByDate" name="requiredByDate" />
+        </div>
+        <div>
+          <label class="ims-label">Expected delivery</label>
+          <input class="ims-input" type="date" [(ngModel)]="form.expectedDeliveryDate" name="expectedDeliveryDate" />
+        </div>
+        <div>
+          <label class="ims-label">Priority</label>
+          <select class="ims-select" [(ngModel)]="form.priority" name="priority">
+            <option value="Normal">Normal</option>
+            <option value="High">High</option>
+            <option value="Urgent">Urgent</option>
+          </select>
+        </div>
+        <div class="span2">
+          <label class="ims-label">Product</label>
+          <select class="ims-select" [(ngModel)]="form.productId" name="productId" required>
+            <option value="">Select product</option>
+            <option *ngFor="let p of products" [value]="p.id">
+              {{ p.name }} · stock {{ p.stockQuantity }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="ims-label">Quantity</label>
+          <input class="ims-input" type="number" min="1" [(ngModel)]="form.quantity" name="quantity" required />
+        </div>
+        <div>
+          <label class="ims-label">Unit price</label>
+          <input class="ims-input" type="number" min="0" [(ngModel)]="form.unitPrice" name="unitPrice" required />
+        </div>
+        <div class="total-tile">
+          <span class="total-label">Total</span>
+          <strong class="total-val">{{ totalValue | currency : 'INR' : 'symbol' : '1.2-2' }}</strong>
+        </div>
+        <div class="span2">
+          <label class="ims-label">Notes / Justification</label>
+          <textarea class="ims-textarea" rows="3" [(ngModel)]="form.notes" name="notes"></textarea>
+        </div>
+      </div>
+      <button type="submit" class="ims-btn ims-btn-primary">
+        Submit for Approval
+      </button>
+    </form>
+  </section>
+
+  <section class="po-tabs">
+    <button type="button" [class.active]="tab === 'ALL'" (click)="setTab('ALL')">All</button>
+    <button type="button" [class.active]="tab === 'PENDING'" (click)="setTab('PENDING')">Pending</button>
+    <button type="button" [class.active]="tab === 'APPROVED'" (click)="setTab('APPROVED')">Approved</button>
+    <button type="button" [class.active]="tab === 'RECEIVED'" (click)="setTab('RECEIVED')">Received</button>
+  </section>
+
+  <section class="ims-card po-table-wrap">
+    <div class="table-scroll">
+      <table class="po-table">
+        <thead>
+          <tr>
+            <th>PO Number</th>
+            <th>Supplier</th>
+            <th>Items</th>
+            <th>Total Value</th>
+            <th>Created</th>
+            <th>Expected</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let po of rows">
+            <td class="mono">{{ po.poNumber }}</td>
+            <td>{{ po.supplierName }}</td>
+            <td class="muted">
+              {{ po.items?.[0]?.productName || '—' }} × {{ po.items?.[0]?.quantity || 0 }}
+            </td>
+            <td class="amt">{{ po.totalValue | currency : 'INR' : 'symbol' : '1.2-2' }}</td>
+            <td class="muted">{{ po.createdAt | date : 'MMM d, y' }}</td>
+            <td class="muted">{{ po.expectedDeliveryDate || '—' }}</td>
+            <td>
+              <span class="status-pill" [ngClass]="po.status?.toLowerCase()">{{ po.status }}</span>
+            </td>
+            <td class="actions">
+              <button *ngIf="po.status === 'PENDING'" type="button" class="ims-btn ims-btn-ghost" (click)="approve(po.id)">
+                Approve
+              </button>
+              <button *ngIf="po.status === 'APPROVED'" type="button" class="ims-btn ims-btn-ghost" (click)="receive(po)">
+                Receive
+              </button>
+              <button type="button" class="ims-btn ims-btn-ghost" (click)="view(po)">View</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p *ngIf="!rows.length" class="empty-hint">No purchase orders yet.</p>
+  </section>
+</div>

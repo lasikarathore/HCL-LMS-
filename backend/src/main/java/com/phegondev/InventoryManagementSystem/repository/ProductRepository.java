@@ -16,8 +16,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findByStockQuantityLessThanOrderByStockQuantityAsc(int threshold, Pageable pageable);
 
+    List<Product> findByStockQuantityLessThanOrderByStockQuantityAsc(int threshold);
+
     @Query("SELECT COALESCE(SUM(p.price * p.stockQuantity), 0) FROM Product p")
     BigDecimal sumInventoryValue();
+
 
     @Query("SELECT c.name, COALESCE(SUM(p.price * p.stockQuantity), 0) FROM Product p JOIN p.category c GROUP BY c.id, c.name ORDER BY COALESCE(SUM(p.price * p.stockQuantity), 0) DESC")
     List<Object[]> sumInventoryValueByCategory();

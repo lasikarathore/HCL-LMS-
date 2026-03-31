@@ -17,6 +17,7 @@ import com.phegondev.InventoryManagementSystem.exceptions.NotFoundException;
 import com.phegondev.InventoryManagementSystem.repository.ProductRepository;
 import com.phegondev.InventoryManagementSystem.repository.SupplierRepository;
 import com.phegondev.InventoryManagementSystem.repository.TransactionRepository;
+import com.phegondev.InventoryManagementSystem.service.StockAlertService;
 import com.phegondev.InventoryManagementSystem.service.TransactionService;
 import com.phegondev.InventoryManagementSystem.service.TransactionTimeSeriesHelper;
 import com.phegondev.InventoryManagementSystem.service.UserService;
@@ -52,6 +53,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final UserService userService;
     private final ProductRepository productRepository;
     private final TransactionTimeSeriesHelper timeSeriesHelper;
+    private final StockAlertService stockAlertService;
 
 
 
@@ -75,11 +77,13 @@ public class TransactionServiceImpl implements TransactionService {
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() + quantity);
         productRepository.save(product);
+        stockAlertService.reconcileAfterStockChange(product);
 
         //create a transaction
         Transaction transaction = Transaction.builder()
                 .transactionType(TransactionType.PURCHASE)
-                .status(TransactionStatus.COMPLETED)
+                // Keep null to stay compatible with existing DB status check constraint values.
+                .status(null)
                 .product(product)
                 .user(user)
                 .supplier(supplier)
@@ -115,11 +119,13 @@ public class TransactionServiceImpl implements TransactionService {
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() - quantity);
         productRepository.save(product);
+        stockAlertService.reconcileAfterStockChange(product);
 
         //create a transaction
         Transaction transaction = Transaction.builder()
                 .transactionType(TransactionType.SALE)
-                .status(TransactionStatus.COMPLETED)
+                // Keep null to stay compatible with existing DB status check constraint values.
+                .status(null)
                 .product(product)
                 .user(user)
                 .totalProducts(quantity)
@@ -155,11 +161,13 @@ public class TransactionServiceImpl implements TransactionService {
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() - quantity);
         productRepository.save(product);
+        stockAlertService.reconcileAfterStockChange(product);
 
         //create a transaction
         Transaction transaction = Transaction.builder()
                 .transactionType(TransactionType.RETURN_TO_SUPPLIER)
-                .status(TransactionStatus.PROCESSING)
+                // Keep null to stay compatible with existing DB status check constraint values.
+                .status(null)
                 .product(product)
                 .user(user)
                 .supplier(supplier)

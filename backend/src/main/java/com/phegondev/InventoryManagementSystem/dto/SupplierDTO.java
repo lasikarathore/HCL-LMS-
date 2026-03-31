@@ -21,4 +21,16 @@ public class SupplierDTO {
     private String name;
 
     private String address;
+
+    // Enhanced supplier management fields (stored in SupplierProfile)
+    private String email;
+    private String categorySpecialisation;
+    private String paymentTerms;
+    private Double starRating;
+    private Integer onTimeDeliveryPercent;
+    private Boolean active;
+
+    // Analytics/computed fields (optional)
+    private Long itemsSupplied;
+    private java.math.BigDecimal totalPurchaseValue;
 }

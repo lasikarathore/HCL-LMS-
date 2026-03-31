@@ -69,4 +69,54 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
             LIMIT 6
             """, nativeQuery = true)
     List<Object[]> topProductVolumeSince(@Param("since") LocalDateTime since);
+
+    @Query(value = """
+            SELECT COALESCE(SUM(t.total_price), 0)
+            FROM transactions t
+            WHERE t.transaction_type = 'PURCHASE' AND t.supplier_id = :supplierId
+            """, nativeQuery = true)
+    BigDecimal sumPurchasesBySupplier(@Param("supplierId") Long supplierId);
+
+    @Query(value = """
+            SELECT COALESCE(SUM(t.total_products), 0)
+            FROM transactions t
+            WHERE t.transaction_type = 'PURCHASE' AND t.supplier_id = :supplierId
+            """, nativeQuery = true)
+    Long sumPurchaseUnitsBySupplier(@Param("supplierId") Long supplierId);
+
+    @Query(value = """
+            SELECT DATE_TRUNC('month', t.created_at) AS month_start,
+                   COALESCE(SUM(CASE WHEN t.transaction_type = 'SALE' THEN t.total_price ELSE 0 END), 0) AS sales,
+                   COALESCE(SUM(CASE WHEN t.transaction_type = 'PURCHASE' THEN t.total_price ELSE 0 END), 0) AS purchases
+            FROM transactions t
+            WHERE t.created_at >= :since
+            GROUP BY 1
+            ORDER BY 1
+            """, nativeQuery = true)
+    List<Object[]> monthlySalesVsPurchasesSince(@Param("since") LocalDateTime since);
+
+    @Query(value = """
+            SELECT c.name,
+                   COALESCE(SUM(CASE WHEN t.transaction_type = 'SALE' THEN t.total_price ELSE 0 END), 0) AS revenue
+            FROM transactions t
+            JOIN products p ON t.product_id = p.id
+            JOIN categories c ON p.category_id = c.id
+            WHERE t.transaction_type = 'SALE' AND t.created_at >= :since AND t.created_at < :until
+            GROUP BY c.id, c.name
+            ORDER BY 2 DESC
+            """, nativeQuery = true)
+    List<Object[]> revenueByCategoryBetween(@Param("since") LocalDateTime since, @Param("until") LocalDateTime until);
+
+    @Query(value = """
+            SELECT p.id,
+                   p.name,
+                   COALESCE(SUM(CASE WHEN t.transaction_type = 'SALE' THEN t.total_products ELSE 0 END), 0) AS units_sold,
+                   COALESCE(SUM(CASE WHEN t.transaction_type = 'PURCHASE' THEN t.total_products ELSE 0 END), 0) AS units_purchased
+            FROM products p
+            LEFT JOIN transactions t ON t.product_id = p.id
+                 AND t.created_at >= :since AND t.created_at < :until
+            GROUP BY p.id, p.name
+            ORDER BY p.id DESC
+            """, nativeQuery = true)
+    List<Object[]> unitsSoldPurchasedByProductBetween(@Param("since") LocalDateTime since, @Param("until") LocalDateTime until);
 }

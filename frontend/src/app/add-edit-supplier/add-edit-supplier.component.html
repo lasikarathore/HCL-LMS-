@@ -28,6 +28,16 @@
         />
       </div>
       <div>
+        <label class="ims-label">Email</label>
+        <input
+          class="ims-input"
+          type="email"
+          [(ngModel)]="formData.email"
+          name="email"
+          placeholder="vendor@company.com"
+        />
+      </div>
+      <div>
         <label class="ims-label">Address</label>
         <input
           class="ims-input"
@@ -36,6 +46,43 @@
           name="address"
           placeholder="Street, city, region"
         />
+      </div>
+      <div>
+        <label class="ims-label">Category Specialisation</label>
+        <select
+          class="ims-select"
+          [(ngModel)]="formData.categorySpecialisation"
+          name="categorySpecialisation"
+        >
+          <option value="">Select category</option>
+          <option *ngFor="let c of categories" [value]="c.name">
+            {{ c.name }}
+          </option>
+        </select>
+      </div>
+      <div>
+        <label class="ims-label">Payment Terms</label>
+        <select class="ims-select" [(ngModel)]="formData.paymentTerms" name="paymentTerms">
+          <option value="Net 30">Net 30</option>
+          <option value="Net 15">Net 15</option>
+          <option value="Net 60">Net 60</option>
+          <option value="Immediate">Immediate</option>
+        </select>
+      </div>
+      <div>
+        <label class="ims-label">Star rating</label>
+        <input class="ims-input" type="number" min="0" max="5" step="0.1" [(ngModel)]="formData.starRating" name="starRating" />
+      </div>
+      <div>
+        <label class="ims-label">On-time delivery %</label>
+        <input class="ims-input" type="number" min="0" max="100" step="1" [(ngModel)]="formData.onTimeDeliveryPercent" name="onTimeDeliveryPercent" />
+      </div>
+      <div>
+        <label class="ims-label">Status</label>
+        <select class="ims-select" [(ngModel)]="formData.active" name="active">
+          <option [ngValue]="true">Active</option>
+          <option [ngValue]="false">Inactive</option>
+        </select>
       </div>
       <button type="submit" class="ims-btn ims-btn-primary wide">
         {{ isEditing ? 'Save supplier' : 'Create supplier' }}
