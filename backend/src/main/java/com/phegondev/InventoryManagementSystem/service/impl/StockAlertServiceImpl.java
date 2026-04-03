@@ -27,9 +27,12 @@ public class StockAlertServiceImpl implements StockAlertService {
     private final AtomicBoolean initialSyncDone = new AtomicBoolean(false);
 
     private StockAlertStatus determineStatus(int stockQuantity) {
-        if (stockQuantity < StockAlertStatus.CRITICAL.getThreshold()) return StockAlertStatus.CRITICAL;
-        if (stockQuantity < StockAlertStatus.LOW.getThreshold()) return StockAlertStatus.LOW;
-        if (stockQuantity < StockAlertStatus.WATCH.getThreshold()) return StockAlertStatus.WATCH;
+        if (stockQuantity < StockAlertStatus.CRITICAL.getThreshold())
+            return StockAlertStatus.CRITICAL;
+        if (stockQuantity < StockAlertStatus.LOW.getThreshold())
+            return StockAlertStatus.LOW;
+        if (stockQuantity < StockAlertStatus.WATCH.getThreshold())
+            return StockAlertStatus.WATCH;
         return null;
     }
 
@@ -44,13 +47,14 @@ public class StockAlertServiceImpl implements StockAlertService {
     @Override
     @Transactional
     public void reconcileAfterStockChange(Product product) {
-        if (product == null || product.getId() == null) return;
+        if (product == null || product.getId() == null)
+            return;
 
         int stockQuantity = product.getStockQuantity() == null ? 0 : product.getStockQuantity();
         StockAlertStatus newStatus = determineStatus(stockQuantity);
 
-        List<StockAlert> existingUnresolved =
-                stockAlertRepository.findByProduct_IdAndResolvedFalseOrderByCreatedAtDesc(product.getId());
+        List<StockAlert> existingUnresolved = stockAlertRepository
+                .findByProduct_IdAndResolvedFalseOrderByCreatedAtDesc(product.getId());
 
         if (newStatus == null) {
             for (StockAlert existing : existingUnresolved) {
@@ -94,11 +98,12 @@ public class StockAlertServiceImpl implements StockAlertService {
     }
 
     private void ensureInitialSync() {
-        if (!initialSyncDone.compareAndSet(false, true)) return;
+        if (!initialSyncDone.compareAndSet(false, true))
+            return;
 
         int watchThreshold = StockAlertStatus.WATCH.getThreshold();
-        List<Product> lowStockProducts =
-                productRepository.findByStockQuantityLessThanOrderByStockQuantityAsc(watchThreshold);
+        List<Product> lowStockProducts = productRepository
+                .findByStockQuantityLessThanOrderByStockQuantityAsc(watchThreshold);
         for (Product p : lowStockProducts) {
             reconcileAfterStockChange(p);
         }
@@ -120,7 +125,8 @@ public class StockAlertServiceImpl implements StockAlertService {
         // Deduplicate by product.
         Map<Long, StockAlert> bestByProductId = new HashMap<>();
         for (StockAlert a : unresolved) {
-            if (a.getProduct() == null || a.getProduct().getId() == null) continue;
+            if (a.getProduct() == null || a.getProduct().getId() == null)
+                continue;
             Long pid = a.getProduct().getId();
             StockAlert cur = bestByProductId.get(pid);
             if (cur == null) {
@@ -159,4 +165,3 @@ public class StockAlertServiceImpl implements StockAlertService {
                 .build()).toList();
     }
 }
-

@@ -15,6 +15,7 @@ import com.phegondev.InventoryManagementSystem.repository.PurchaseOrderRepositor
 import com.phegondev.InventoryManagementSystem.repository.SupplierRepository;
 import com.phegondev.InventoryManagementSystem.repository.TransactionRepository;
 import com.phegondev.InventoryManagementSystem.service.PurchaseOrderService;
+import com.phegondev.InventoryManagementSystem.service.StockAlertService;
 import com.phegondev.InventoryManagementSystem.entity.*;
 import com.phegondev.InventoryManagementSystem.enums.*;
 import com.phegondev.InventoryManagementSystem.exceptions.NotFoundException;
@@ -37,6 +38,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private final TransactionRepository transactionRepository;
     private final com.phegondev.InventoryManagementSystem.repository.SupplierProfileRepository supplierProfileRepository;
     private final com.phegondev.InventoryManagementSystem.service.UserService userService;
+    private final StockAlertService stockAlertService;
 
     private static String formatPoNumber(long id, int year) {
         return String.format("PO-%04d-%03d", year, id);
@@ -215,6 +217,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                         .description("Stock received from PO: " + po.getPoNumber())
                         .build();
                 transactionRepository.save(transaction);
+                stockAlertService.reconcileAfterStockChange(product);
             }
         }
 

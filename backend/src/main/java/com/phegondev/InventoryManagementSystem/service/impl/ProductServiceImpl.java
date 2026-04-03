@@ -10,6 +10,7 @@ import com.phegondev.InventoryManagementSystem.repository.CategoryRepository;
 import com.phegondev.InventoryManagementSystem.repository.ProductRepository;
 import com.phegondev.InventoryManagementSystem.repository.TransactionRepository;
 import com.phegondev.InventoryManagementSystem.service.ProductService;
+import com.phegondev.InventoryManagementSystem.service.StockAlertService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +36,7 @@ public class ProductServiceImpl implements ProductService {
     private final ModelMapper modelMapper;
     private final CategoryRepository categoryRepository;
     private final TransactionRepository transactionRepository;
+    private final StockAlertService stockAlertService;
 
     private static final String IMAGE_DIRECTORY = System.getProperty("user.dir") + "/product-image/";
 
@@ -67,6 +69,8 @@ public class ProductServiceImpl implements ProductService {
 
         // save the product to our database
         productRepository.save(productToSave);
+        stockAlertService.reconcileAfterStockChange(productToSave);
+        
         return Response.builder()
                 .status(200)
                 .message("Product successfully saved")
@@ -116,6 +120,8 @@ public class ProductServiceImpl implements ProductService {
 
         // Update the product
         productRepository.save(existingProduct);
+        stockAlertService.reconcileAfterStockChange(existingProduct);
+
         return Response.builder()
                 .status(200)
                 .message("Product successfully Updated")

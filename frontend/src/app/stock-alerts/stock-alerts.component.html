@@ -26,11 +26,7 @@
         <span class="threshold-chip chip-watch">Watch: &lt; {{ watchThreshold }} units</span>
       </div>
       <div class="alerts-threshold-right">
-        <label class="toggle">
-          <input type="checkbox" [(ngModel)]="autoNotifyEnabled" />
-          <span class="toggle-ui"></span>
-          <span class="toggle-label">Auto-notify: {{ autoNotifyEnabled ? 'ON' : 'OFF' }}</span>
-        </label>
+        <!-- Auto-notify option removed -->
       </div>
     </div>
   </section>
@@ -64,36 +60,20 @@
           </div>
         </div>
         <div class="filter-row">
-          <button
-            type="button"
-            class="filter-btn"
-            [class.active]="filterStatus === 'All'"
-            (click)="filterStatus = 'All'"
-          >
+          <button type="button" class="filter-btn" [class.active]="filterStatus === 'All'"
+            (click)="filterStatus = 'All'">
             All
           </button>
-          <button
-            type="button"
-            class="filter-btn"
-            [class.active]="filterStatus === 'Critical'"
-            (click)="filterStatus = 'Critical'"
-          >
+          <button type="button" class="filter-btn" [class.active]="filterStatus === 'Critical'"
+            (click)="filterStatus = 'Critical'">
             Critical
           </button>
-          <button
-            type="button"
-            class="filter-btn"
-            [class.active]="filterStatus === 'Low'"
-            (click)="filterStatus = 'Low'"
-          >
+          <button type="button" class="filter-btn" [class.active]="filterStatus === 'Low'"
+            (click)="filterStatus = 'Low'">
             Low
           </button>
-          <button
-            type="button"
-            class="filter-btn"
-            [class.active]="filterStatus === 'Watch'"
-            (click)="filterStatus = 'Watch'"
-          >
+          <button type="button" class="filter-btn" [class.active]="filterStatus === 'Watch'"
+            (click)="filterStatus = 'Watch'">
             Watch
           </button>
         </div>
@@ -121,27 +101,17 @@
               <td class="stock-cell">
                 <div class="stock-value">{{ a.currentStock }}</div>
                 <div class="stock-bar">
-                  <div
-                    class="stock-bar-fill"
-                    [ngClass]="statusBarClass(a.status)"
-                    [style.width.%]="stockPercent(a.currentStock, a.threshold)"
-                  ></div>
+                  <div class="stock-bar-fill" [ngClass]="statusBarClass(a.status)"
+                    [style.width.%]="stockPercent(a.currentStock, a.threshold)"></div>
                 </div>
               </td>
               <td class="num-cell">{{ a.threshold }}</td>
               <td>
-                <span
-                  class="ims-pill status-pill"
-                  [ngClass]="statusPillClass(a.status)"
-                  >{{ a.status }}</span
-                >
+                <span class="ims-pill status-pill" [ngClass]="statusPillClass(a.status)">{{ a.status }}</span>
               </td>
               <td class="action-cell">
-                <a
-                  class="ims-btn ims-btn-primary btn-create-po"
-                  [routerLink]="['/purchase-orders']"
-                  [queryParams]="{ product_id: a.productId }"
-                >
+                <a class="ims-btn ims-btn-primary btn-create-po" [routerLink]="['/purchase-orders']"
+                  [queryParams]="{ product_id: a.productId }">
                   Create PO
                 </a>
               </td>
@@ -176,22 +146,16 @@
           </div>
 
           <div class="overview-track">
-            <div
-              class="overview-fill"
-              [ngClass]="statusBarClass(a.status)"
-              [style.width.%]="stockPercent(a.currentStock, a.threshold)"
-            ></div>
+            <div class="overview-fill" [ngClass]="statusBarClass(a.status)"
+              [style.width.%]="stockPercent(a.currentStock, a.threshold)"></div>
           </div>
 
           <div class="overview-meta">
             {{ a.currentStock }}/{{ a.threshold }}
           </div>
 
-          <a
-            class="overview-action ims-btn ims-btn-ghost"
-            [routerLink]="['/purchase-orders']"
-            [queryParams]="{ product_id: a.productId }"
-          >
+          <a class="overview-action ims-btn ims-btn-ghost" [routerLink]="['/purchase-orders']"
+            [queryParams]="{ product_id: a.productId }">
             Create PO
           </a>
         </div>
@@ -203,4 +167,3 @@
     </div>
   </section>
 </div>
-

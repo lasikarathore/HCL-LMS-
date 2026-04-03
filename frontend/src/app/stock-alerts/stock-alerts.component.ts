@@ -23,14 +23,13 @@ export class StockAlertsComponent implements OnInit {
 
   // Filters / UI state
   filterStatus: 'All' | 'Critical' | 'Low' | 'Watch' = 'All';
-  autoNotifyEnabled = true;
 
   // Summary counts
   totalProducts = 0;
   healthyStockCount = 0;
   allProducts: any[] = [];
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) { }
 
   ngOnInit(): void {
     this.loadAlerts();
@@ -48,8 +47,8 @@ export class StockAlertsComponent implements OnInit {
       error: (err) => {
         this.showMessage(
           err?.error?.message ||
-            err?.message ||
-            'Unable to load stock alerts'
+          err?.message ||
+          'Unable to load stock alerts'
         );
       },
     });
