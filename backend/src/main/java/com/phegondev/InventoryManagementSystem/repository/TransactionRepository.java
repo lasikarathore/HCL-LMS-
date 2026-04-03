@@ -89,11 +89,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                    COALESCE(SUM(CASE WHEN t.transaction_type = 'SALE' THEN t.total_price ELSE 0 END), 0) AS sales,
                    COALESCE(SUM(CASE WHEN t.transaction_type = 'PURCHASE' THEN t.total_price ELSE 0 END), 0) AS purchases
             FROM transactions t
-            WHERE t.created_at >= :since
+            WHERE t.created_at >= :since AND t.created_at < :until
             GROUP BY 1
             ORDER BY 1
             """, nativeQuery = true)
-    List<Object[]> monthlySalesVsPurchasesSince(@Param("since") LocalDateTime since);
+    List<Object[]> monthlySalesVsPurchasesBetween(@Param("since") LocalDateTime since, @Param("until") LocalDateTime until);
 
     @Query(value = """
             SELECT c.name,
@@ -119,4 +119,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
             ORDER BY p.id DESC
             """, nativeQuery = true)
     List<Object[]> unitsSoldPurchasedByProductBetween(@Param("since") LocalDateTime since, @Param("until") LocalDateTime until);
+    @Query("SELECT COUNT(t) FROM Transaction t WHERE t.user.id = :userId")
+    long countByUserId(@Param("userId") Long userId);
+
+    @Query("SELECT COALESCE(SUM(t.totalPrice), 0) FROM Transaction t " +
+            "WHERE t.user.id = :userId AND t.transactionType = :type " +
+            "AND CAST(t.createdAt AS date) = :date")
+    BigDecimal sumTotalPriceByUserIdAndTypeAndDate(
+            @Param("userId") Long userId,
+            @Param("type") TransactionType type,
+            @Param("date") java.time.LocalDate date);
 }

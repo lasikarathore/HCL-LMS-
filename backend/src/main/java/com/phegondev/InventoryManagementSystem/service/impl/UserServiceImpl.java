@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Response registerUser(RegisterRequest registerRequest) {
 
-        UserRole role = UserRole.MANAGER;
+        UserRole role = UserRole.STAFF;
 
         if (registerRequest.getRole() != null) {
             role=registerRequest.getRole();

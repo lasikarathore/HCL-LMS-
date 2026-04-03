@@ -3,11 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { ApiService } from '../service/api.service';
 import { Router } from '@angular/router';
+import { HasRoleDirective } from '../shared/directives/has-role.directive';
 
 @Component({
   selector: 'app-product',
   standalone: true,
-  imports: [CommonModule, PaginationComponent],
+  imports: [CommonModule, PaginationComponent, HasRoleDirective],
   templateUrl: './product.component.html',
   styleUrl: './product.component.css',
 })

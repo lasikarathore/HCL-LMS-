@@ -245,7 +245,8 @@ export class ApiService {
     searchText: string,
     page: number = 0,
     size: number = 10,
-    transactionType?: string
+    transactionType?: string,
+    status?: string
   ): Observable<any> {
     const params: Record<string, string | number> = {
       searchText: searchText ?? '',
@@ -254,6 +255,9 @@ export class ApiService {
     };
     if (transactionType) {
       params['transactionType'] = transactionType;
+    }
+    if (status) {
+      params['status'] = status;
     }
     return this.http.get(`${ApiService.BASE_URL}/transactions/all`, {
       params,
@@ -405,6 +409,22 @@ export class ApiService {
   isAdmin(): boolean {
     const role = this.getFromStorageAndDecrypt("role");
     return role === "ADMIN";
+  }
+
+  getRole(): string | null {
+    return this.getFromStorageAndDecrypt("role");
+  }
+
+  isStaff(): boolean {
+    return this.getRole() === "STAFF";
+  }
+
+  isWarehouseManager(): boolean {
+    return this.getRole() === "WAREHOUSE_MANAGER";
+  }
+
+  isProcurementOfficer(): boolean {
+    return this.getRole() === "PROCUREMENT_OFFICER" || this.getRole() === "PROCUREMENT";
   }
 
 }

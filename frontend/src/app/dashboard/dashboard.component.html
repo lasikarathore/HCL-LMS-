@@ -14,110 +14,68 @@
       </p>
     </div>
     <div class="ref-hero-actions">
-      <div class="ref-search-pill">
-        <span class="search-ico">🔍</span>
-        <input type="search" placeholder="Search activity…" disabled />
-      </div>
-      <button type="button" class="ims-btn ims-btn-primary ref-filters">
-        Filters
-      </button>
+      <!-- Search functionality removed -->
     </div>
   </header>
 
-  <app-insight-card-row [cards]="summary?.insightCards"></app-insight-card-row>
+  <!-- Role-based KPI Cards for STAFF -->
+  <div class="ref-kpi-grid" *appHasRole="'STAFF'">
+    <div class="ims-card ref-kpi-card">
+      <div class="kpi-label">My Sales Today</div>
+      <div class="kpi-value">{{ formatMoney(summary?.mySalesToday) }}</div>
+      <div class="kpi-sub">Total revenue from your sales</div>
+    </div>
+    <div class="ims-card ref-kpi-card">
+      <div class="kpi-label">My Transactions Count</div>
+      <div class="kpi-value">{{ summary?.myTransactionsCount }}</div>
+      <div class="kpi-sub">Total orders processed by you</div>
+    </div>
+  </div>
+
+  <app-insight-card-row *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER']"
+    [cards]="summary?.insightCards"></app-insight-card-row>
 
   <div class="ref-main-split" *ngIf="summary">
-    <section class="ref-chart-panel ims-card">
+    <section class="ref-chart-panel ims-card" *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER']">
       <div class="ref-panel-head">
         <div>
           <h2 class="panel-h2">Inventory process</h2>
           <p class="panel-sub">7-day volume from your ledger</p>
         </div>
-        <div class="ref-tabs">
-          <button
-            type="button"
-            [class.active]="mainTab === 'bar'"
-            (click)="mainTab = 'bar'"
-          >
-            Volume
-          </button>
-          <button
-            type="button"
-            [class.active]="mainTab === 'line'"
-            (click)="mainTab = 'line'"
-          >
-            Trend
-          </button>
-        </div>
+        <!-- ... tabs and charts ... -->
       </div>
-      <ngx-charts-bar-vertical
-        *ngIf="mainTab === 'bar' && points(summary.sevenDayVolumeBars).length"
-        [view]="mainChartView"
-        [scheme]="chartScheme"
-        [schemeType]="schemeType"
-        [results]="points(summary.sevenDayVolumeBars)"
-        [gradient]="true"
-        [xAxis]="true"
-        [yAxis]="true"
-        [legend]="showLegend"
-        [showXAxisLabel]="true"
-        [showYAxisLabel]="true"
-        xAxisLabel="Day"
-        yAxisLabel="Amount"
-        [animations]="animations"
-        [roundEdges]="true"
-      >
+      <!-- ... rest of chart logic ... -->
+      <ngx-charts-bar-vertical *ngIf="mainTab === 'bar' && points(summary.sevenDayVolumeBars).length"
+        [view]="mainChartView" [scheme]="chartScheme" [schemeType]="schemeType"
+        [results]="points(summary.sevenDayVolumeBars)" [gradient]="true" [xAxis]="true" [yAxis]="true"
+        [legend]="showLegend" [showXAxisLabel]="true" [showYAxisLabel]="true" xAxisLabel="Day" yAxisLabel="Amount"
+        [animations]="animations" [roundEdges]="true">
       </ngx-charts-bar-vertical>
-      <ngx-charts-line-chart
-        *ngIf="mainTab === 'line' && lineChartResults(summary.sevenDayVolumeLine).length"
-        [view]="mainChartView"
-        [scheme]="chartScheme"
-        [schemeType]="schemeType"
-        [results]="lineChartResults(summary.sevenDayVolumeLine)"
-        [gradient]="true"
-        [xAxis]="true"
-        [yAxis]="true"
-        [legend]="showLegend"
-        [showXAxisLabel]="true"
-        [showYAxisLabel]="true"
-        xAxisLabel="Day"
-        yAxisLabel="Amount"
-        [animations]="animations"
-        [autoScale]="true"
-      >
+      <ngx-charts-line-chart *ngIf="mainTab === 'line' && lineChartResults(summary.sevenDayVolumeLine).length"
+        [view]="mainChartView" [scheme]="chartScheme" [schemeType]="schemeType"
+        [results]="lineChartResults(summary.sevenDayVolumeLine)" [gradient]="true" [xAxis]="true" [yAxis]="true"
+        [legend]="showLegend" [showXAxisLabel]="true" [showYAxisLabel]="true" xAxisLabel="Day" yAxisLabel="Amount"
+        [animations]="animations" [autoScale]="true">
       </ngx-charts-line-chart>
-      <p
-        *ngIf="!points(summary.sevenDayVolumeBars).length"
-        class="panel-empty"
-      >
+      <p *ngIf="!points(summary.sevenDayVolumeBars).length" class="panel-empty">
         No 7-day activity yet.
       </p>
     </section>
 
-    <aside class="ref-dark-stack">
+    <aside class="ref-dark-stack" *appHasRole="['ADMIN']">
       <div class="ref-dark-card">
         <h3 class="dark-title">Category share</h3>
         <p class="dark-sub">By inventory valuation</p>
-        <div
-          class="hmetric"
-          *ngFor="let row of summary.categoryInventoryShare; let i = index"
-        >
+        <div class="hmetric" *ngFor="let row of summary.categoryInventoryShare; let i = index">
           <div class="hmetric-label">
             <span>{{ row.label }}</span>
             <span class="hmetric-pct">{{ row.percent }}%</span>
           </div>
           <div class="hmetric-track">
-            <div
-              class="hmetric-fill"
-              [ngClass]="hbarClass(row.colorIndex ?? i)"
-              [style.width.%]="row.percent"
-            ></div>
+            <div class="hmetric-fill" [ngClass]="hbarClass(row.colorIndex ?? i)" [style.width.%]="row.percent"></div>
           </div>
         </div>
-        <p
-          *ngIf="!summary.categoryInventoryShare?.length"
-          class="dark-empty"
-        >
+        <p *ngIf="!summary.categoryInventoryShare?.length" class="dark-empty">
           Add categorized products to see splits.
         </p>
       </div>
@@ -125,26 +83,12 @@
       <div class="ref-dark-card donut-card">
         <h3 class="dark-title">Activity mix</h3>
         <p class="dark-sub">Last 30 days · transaction types</p>
-        <ngx-charts-pie-chart
-          *ngIf="points(summary.activityDonutLast30Days).length"
-          [view]="donutView"
-          [scheme]="chartScheme"
-          [schemeType]="schemeType"
-          [results]="points(summary.activityDonutLast30Days)"
-          [legend]="true"
-          legendTitle="Transaction types"
-          [legendPosition]="donutLegendPosition"
-          [labels]="showLabels"
-          [doughnut]="true"
-          [arcWidth]="0.35"
-          [gradient]="true"
-          [animations]="animations"
-        >
+        <ngx-charts-pie-chart *ngIf="points(summary.activityDonutLast30Days).length" [view]="donutView"
+          [scheme]="chartScheme" [schemeType]="schemeType" [results]="points(summary.activityDonutLast30Days)"
+          [legend]="true" legendTitle="Transaction types" [legendPosition]="donutLegendPosition" [labels]="showLabels"
+          [doughnut]="true" [arcWidth]="0.35" [gradient]="true" [animations]="animations">
         </ngx-charts-pie-chart>
-        <p
-          *ngIf="!points(summary.activityDonutLast30Days).length"
-          class="dark-empty"
-        >
+        <p *ngIf="!points(summary.activityDonutLast30Days).length" class="dark-empty">
           No transactions in the last 30 days.
         </p>
       </div>

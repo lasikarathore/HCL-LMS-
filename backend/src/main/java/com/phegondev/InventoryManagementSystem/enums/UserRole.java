@@ -1,5 +1,5 @@
 package com.phegondev.InventoryManagementSystem.enums;
 
 public enum UserRole {
-    ADMIN, MANAGER
+    ADMIN, PROCUREMENT_OFFICER, WAREHOUSE_MANAGER, STAFF
 }

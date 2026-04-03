@@ -40,6 +40,12 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
+    @Column(name = "warehouse_id")
+    private Long warehouseId;
+
+    @Column(name = "created_by")
+    private Long createdBy;
+
     @OneToMany(mappedBy = "user")
     private List<Transaction> transactions;
 

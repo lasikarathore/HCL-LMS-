@@ -25,6 +25,10 @@ public class DashboardSummaryDTO {
     private BigDecimal salesRevenueThisMonth;
     private long purchaseTransactionsThisMonth;
     private long saleTransactionsThisMonth;
+
+    private BigDecimal mySalesToday;
+    private long myTransactionsCount;
+
     private List<ProductDTO> lowStockProducts;
     private List<TransactionDTO> recentTransactions;
 

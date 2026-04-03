@@ -13,7 +13,11 @@ import com.phegondev.InventoryManagementSystem.exceptions.NotFoundException;
 import com.phegondev.InventoryManagementSystem.repository.ProductRepository;
 import com.phegondev.InventoryManagementSystem.repository.PurchaseOrderRepository;
 import com.phegondev.InventoryManagementSystem.repository.SupplierRepository;
+import com.phegondev.InventoryManagementSystem.repository.TransactionRepository;
 import com.phegondev.InventoryManagementSystem.service.PurchaseOrderService;
+import com.phegondev.InventoryManagementSystem.entity.*;
+import com.phegondev.InventoryManagementSystem.enums.*;
+import com.phegondev.InventoryManagementSystem.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -30,6 +34,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final SupplierRepository supplierRepository;
     private final ProductRepository productRepository;
+    private final TransactionRepository transactionRepository;
+    private final com.phegondev.InventoryManagementSystem.repository.SupplierProfileRepository supplierProfileRepository;
     private final com.phegondev.InventoryManagementSystem.service.UserService userService;
 
     private static String formatPoNumber(long id, int year) {
@@ -81,6 +87,15 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     public Response createPurchaseOrder(PurchaseOrderCreateRequest req) {
         Supplier supplier = supplierRepository.findById(req.getSupplierId())
                 .orElseThrow(() -> new NotFoundException("Supplier Not Found"));
+
+        // Check if supplier is active via profile
+        supplierProfileRepository.findBySupplier_Id(supplier.getId()).ifPresent(profile -> {
+            if (profile.getActive() != null && !profile.getActive()) {
+                throw new com.phegondev.InventoryManagementSystem.exceptions.ConflictException(
+                        "Supplier '" + supplier.getName() + "' is currently INACTIVE and cannot be used for new orders.");
+            }
+        });
+
         Product product = productRepository.findById(req.getProductId())
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));
 
@@ -169,12 +184,44 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     public Response receivePurchaseOrder(Long id) {
         PurchaseOrder po = purchaseOrderRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Purchase order not found"));
+
+        if (po.getStatus() == PurchaseOrderStatus.RECEIVED) {
+            throw new RuntimeException("Purchase order already received");
+        }
+        if (po.getStatus() != PurchaseOrderStatus.APPROVED) {
+            throw new RuntimeException("Only APPROVED purchase orders can be received. Current status: " + po.getStatus());
+        }
+
         po.setStatus(PurchaseOrderStatus.RECEIVED);
         po.setUpdatedAt(LocalDateTime.now());
+
+        // Update Stock and Log Transactions
+        for (PurchaseOrderItem item : po.getItems()) {
+            Product product = item.getProduct();
+            if (product != null) {
+                product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
+                product.setUpdatedAt(LocalDateTime.now());
+                productRepository.save(product);
+
+                // Create Transaction record
+                Transaction transaction = Transaction.builder()
+                        .product(product)
+                        .supplier(po.getSupplier())
+                        .user(userService.getCurrentLoggedInUser())
+                        .transactionType(TransactionType.PURCHASE)
+                        .status(null) // Keep null to avoid existing DB status check constraint violation
+                        .totalProducts(item.getQuantity())
+                        .totalPrice(item.getLineTotal())
+                        .description("Stock received from PO: " + po.getPoNumber())
+                        .build();
+                transactionRepository.save(transaction);
+            }
+        }
+
         purchaseOrderRepository.save(po);
         return Response.builder()
                 .status(200)
-                .message("Marked as received")
+                .message("Marked as received, stock updated and transaction logged")
                 .purchaseOrder(toDto(po))
                 .build();
     }

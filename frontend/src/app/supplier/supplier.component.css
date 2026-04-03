@@ -170,11 +170,14 @@
 }
 
 .pill-active {
-  background: var(--ims-pastel-mint);
-  color: #2d5a45;
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #10b98133;
 }
 
 .pill-inactive {
-  background: var(--ims-pastel-peach);
-  color: #922b2b;
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #ef444433;
+  font-weight: 700;
 }

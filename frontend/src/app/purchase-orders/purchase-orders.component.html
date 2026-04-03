@@ -134,12 +134,18 @@
               <span class="status-pill" [ngClass]="po.status?.toLowerCase()">{{ po.status }}</span>
             </td>
             <td class="actions">
-              <button *ngIf="po.status === 'PENDING'" type="button" class="ims-btn ims-btn-ghost" (click)="approve(po.id)">
+              <button *ngIf="po.status?.toUpperCase() === 'PENDING' && isAdmin" type="button" class="ims-btn ims-btn-ghost" (click)="approve(po.id)">
                 Approve
               </button>
-              <button *ngIf="po.status === 'APPROVED'" type="button" class="ims-btn ims-btn-ghost" (click)="receive(po)">
+
+              <button *ngIf="po.status?.toUpperCase() === 'APPROVED' && (isAdmin || isWarehouseManager)" type="button" class="ims-btn ims-btn-ghost" (click)="receive(po)">
                 Receive
               </button>
+
+              <span *ngIf="po.status?.toUpperCase() === 'RECEIVED'" class="ims-badge ims-badge-success">
+                Completed
+              </span>
+
               <button type="button" class="ims-btn ims-btn-ghost" (click)="view(po)">View</button>
             </td>
           </tr>

@@ -22,30 +22,26 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
 
-  { path: 'category', component: CategoryComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
+  { path: 'category', component: CategoryComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER'] } },
+  { path: 'suppliers', component: SupplierComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'PROCUREMENT_OFFICER'] } },
+  { path: 'edit-supplier/:supplierId', component: AddEditSupplierComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'PROCUREMENT_OFFICER'] } },
+  { path: 'add-supplier', component: AddEditSupplierComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'PROCUREMENT_OFFICER'] } },
 
-  { path: 'supplier', redirectTo: '/suppliers', pathMatch: 'full' },
-  { path: 'suppliers', component: SupplierComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
-  { path: 'edit-supplier/:supplierId', component: AddEditSupplierComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
-  { path: 'add-supplier', component: AddEditSupplierComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
+  { path: 'product', component: ProductComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER'] } },
+  { path: 'edit-product/:productId', component: AddEditProductComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER'] } },
+  { path: 'add-product', component: AddEditProductComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER'] } },
 
-  { path: 'product', component: ProductComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
-  { path: 'edit-product/:productId', component: AddEditProductComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
-  { path: 'add-product', component: AddEditProductComponent, canActivate: [GuardService], data: { requiresAdmin: true } },
+  { path: 'purchase-orders', component: PurchaseOrdersComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER'] } },
+  { path: 'purchase', component: PurchaseComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER'] } },
+  { path: 'sell', component: SellComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'STAFF'] } },
 
-
-  { path: 'purchase-orders', component: PurchaseOrdersComponent, canActivate: [GuardService] },
-  { path: 'purchase', component: PurchaseComponent, canActivate: [GuardService] },
-  { path: 'sell', component: SellComponent, canActivate: [GuardService] },
-
-  { path: 'transaction', component: TransactionComponent, canActivate: [GuardService] },
-  { path: 'transaction/:transactionId', component: TransactionDetailsComponent, canActivate: [GuardService] },
-
+  { path: 'transaction', component: TransactionComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER'] } },
+  { path: 'transaction/:transactionId', component: TransactionDetailsComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER'] } },
 
   { path: 'profile', component: ProfileComponent, canActivate: [GuardService] },
   { path: 'dashboard', component: DashboardComponent, canActivate: [GuardService] },
-  { path: 'stock-alerts', component: StockAlertsComponent, canActivate: [GuardService] },
-  { path: 'analytics', component: AnalyticsComponent, canActivate: [GuardService] },
+  { path: 'stock-alerts', component: StockAlertsComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER'] } },
+  { path: 'analytics', component: AnalyticsComponent, canActivate: [GuardService], data: { roles: ['ADMIN'] } },
 
   //   WIDE CARD
   { path: "", redirectTo: "/login", pathMatch: 'full' },

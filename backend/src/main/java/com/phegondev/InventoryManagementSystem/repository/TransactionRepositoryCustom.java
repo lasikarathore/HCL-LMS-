@@ -10,5 +10,5 @@ public interface TransactionRepositoryCustom {
      * Programmatic native SQL — not derived from JPQL — so PostgreSQL never sees
      * {@code lower(bytea)} from Hibernate’s old search translation.
      */
-    Page<Transaction> pageTransactionsFiltered(String transactionType, String searchText, Pageable pageable);
+    Page<Transaction> pageTransactionsFiltered(String transactionType, String searchText, String status, Long userId, Pageable pageable);
 }

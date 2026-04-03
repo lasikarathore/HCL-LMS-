@@ -5,11 +5,12 @@ import { ApiService } from '../service/api.service';
 import { InsightCardRowComponent } from '../shared/insight-card-row/insight-card-row.component';
 import { IMS_CHART_SCHEME } from '../theme/ims-chart-scheme';
 import { LegendPosition, ScaleType } from '@swimlane/ngx-charts';
+import { HasRoleDirective } from '../shared/directives/has-role.directive';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, NgxChartsModule, InsightCardRowComponent],
+  imports: [CommonModule, NgxChartsModule, InsightCardRowComponent, HasRoleDirective],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
@@ -17,6 +18,10 @@ export class DashboardComponent implements OnInit {
   user: any = null;
   summary: any = null;
   message = '';
+
+  get role(): string | null {
+    return this.apiService.getRole();
+  }
 
   mainTab: 'bar' | 'line' = 'bar';
 

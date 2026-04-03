@@ -21,7 +21,7 @@ export class RegisterComponent {
     name: '',
     phoneNumber: '',
     password: '',
-    role: 'MANAGER',
+    role: 'ADMIN',
   };
   message:string | null = null;
 

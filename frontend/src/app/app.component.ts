@@ -15,11 +15,12 @@ import {
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { ApiService } from './service/api.service';
+import { HasRoleDirective } from './shared/directives/has-role.directive';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, HasRoleDirective],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })

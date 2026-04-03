@@ -15,12 +15,43 @@
         <p>Linked to live products and suppliers from the API</p>
       </div>
       <form (ngSubmit)="handleSubmit()" class="stack-form">
+        <div class="po-selector-box" [class.selected]="!!poId">
+          <label class="ims-label">Select approved Purchase Order (Optional)</label>
+          <div class="flex-row">
+            <select
+              class="ims-select"
+              name="poId"
+              [(ngModel)]="poId"
+              (ngModelChange)="onPoSelect($event)"
+            >
+              <option value="">-- Manual Entry / No PO --</option>
+              <option *ngFor="let po of approvedPOs" [value]="po.id">
+                #{{ po.poNumber }} ({{ po.supplierName }})
+              </option>
+            </select>
+            <button
+              type="button"
+              class="ims-btn ims-btn-ghost"
+              *ngIf="poId"
+              (click)="resetForm()"
+            >
+              Clear PO
+            </button>
+          </div>
+          <p class="po-hint" *ngIf="poId">
+            Auto-filling from PO details. Manual edits disabled.
+          </p>
+        </div>
+
+        <hr class="form-sep" />
+
         <div>
           <label class="ims-label">Product</label>
           <select
             class="ims-select"
             name="productId"
             [(ngModel)]="productId"
+            [disabled]="!!poId"
             required
           >
             <option value="">Select product</option>
@@ -35,6 +66,7 @@
             class="ims-select"
             name="supplierId"
             [(ngModel)]="supplierId"
+            [disabled]="!!poId"
             required
           >
             <option value="">Select supplier</option>
@@ -51,6 +83,7 @@
             min="1"
             [(ngModel)]="quantity"
             name="quantity"
+            [disabled]="!!poId"
             required
           />
         </div>
@@ -65,17 +98,17 @@
           />
         </div>
         <button type="submit" class="ims-btn ims-btn-primary wide">
-          Record purchase
+          {{ poId ? 'Confirm PO Receipt' : 'Record Manual Purchase' }}
         </button>
       </form>
     </section>
 
     <section class="history ims-card">
-      <h2 class="hist-title">Recent purchases</h2>
+      <h2 class="hist-title">Stock Inward History</h2>
       <ul class="hist-list" *ngIf="recentPurchases.length">
         <li *ngFor="let t of recentPurchases">
           <div>
-            <span class="hist-type">{{ t.transactionType }}</span>
+            <span class="hist-type">{{ t.transactionType === 'PURCHASE' ? 'STOCK RECEIVED' : t.transactionType }}</span>
             <span class="hist-sub">{{ t.description || '—' }}</span>
           </div>
           <div class="hist-meta">

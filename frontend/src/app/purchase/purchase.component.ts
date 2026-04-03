@@ -19,6 +19,7 @@ export class PurchaseComponent implements OnInit {
 
   products: any[] = [];
   suppliers: any[] = [];
+  approvedPOs: any[] = []; // NEW: for PO selection
   productId = '';
   supplierId = '';
   poId = '';
@@ -54,8 +55,22 @@ export class PurchaseComponent implements OnInit {
     this.loadRecentPurchases();
   }
 
+  onPoSelect(id: string) {
+    if (!id) {
+      this.resetForm();
+      return;
+    }
+    const po = this.approvedPOs.find(p => String(p.id) === id);
+    if (po) {
+      this.productId = String(po.supplierId == null ? '' : po.items[0]?.productId || '');
+      this.supplierId = String(po.supplierId || '');
+      this.quantity = String(po.items[0]?.quantity || '');
+      this.description = `PO Receipt: ${po.poNumber}`;
+    }
+  }
+
   loadRecentPurchases(): void {
-    this.apiService.getAllTransactions('', 0, 10, 'PURCHASE').subscribe({
+    this.apiService.getAllTransactions('', 0, 10, 'PURCHASE', 'COMPLETED').subscribe({
       next: (res: any) => {
         const ok = res?.status === 200 || res?.status === '200';
         this.recentPurchases = ok ? res.transactions || [] : [];
@@ -92,7 +107,8 @@ export class PurchaseComponent implements OnInit {
     this.apiService.getAllSuppliers().subscribe({
       next: (res: any) => {
         if (res.status === 200) {
-          this.suppliers = res.suppliers || [];
+          const all = res.suppliers || [];
+          this.suppliers = all.filter((s: any) => s.active !== false);
         }
       },
       error: (error) => {
@@ -103,9 +119,36 @@ export class PurchaseComponent implements OnInit {
         );
       },
     });
+
+    this.apiService.getPurchaseOrders('APPROVED').subscribe({
+      next: (res: any) => {
+        if (res.status === 200) {
+          this.approvedPOs = res.purchaseOrders || [];
+        }
+      },
+      error: () => {}
+    });
   }
 
   handleSubmit(): void {
+    // 1. If we have a PO ID, we follow the "Receive PO" workflow
+    if (this.poId) {
+      this.apiService.receivePurchaseOrder(this.poId).subscribe({
+        next: (res: any) => {
+          if (res?.status === 200) {
+            this.showMessage("PO Received successfully, stock updated");
+            this.resetForm();
+            this.loadRecentPurchases();
+          } else {
+            this.showMessage(res?.message || "Unable to receive PO");
+          }
+        },
+        error: (err) => this.showMessage(err?.error?.message || err?.message || "Error receiving PO")
+      });
+      return;
+    }
+
+    // 2. Otherwise, follow the "Manual Stock Inward" workflow
     if (!this.productId || !this.supplierId || !this.quantity) {
       this.showMessage('Please fill all required fields');
       return;
@@ -121,17 +164,8 @@ export class PurchaseComponent implements OnInit {
       next: (res: any) => {
         if (res.status === 200) {
           this.showMessage(res.message);
-          // If this purchase is completing a PO receive flow, mark the PO as RECEIVED.
-          const maybePo = this.poId;
           this.resetForm();
           this.loadRecentPurchases();
-
-          if (maybePo) {
-            this.apiService.receivePurchaseOrder(maybePo).subscribe({
-              next: () => {},
-              error: () => {},
-            });
-          }
         }
       },
       error: (error) => {

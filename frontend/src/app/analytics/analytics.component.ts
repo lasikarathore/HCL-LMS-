@@ -19,6 +19,7 @@ export class AnalyticsComponent implements OnInit {
   message = '';
   range: RangeOpt = 'THIS_MONTH';
 
+  loading = false;
   summary: any = null;
 
   chartScheme = IMS_CHART_SCHEME;
@@ -33,12 +34,17 @@ export class AnalyticsComponent implements OnInit {
   }
 
   loadAll(): void {
+    this.loading = true;
     this.api.getAnalyticsSummary(this.range).subscribe({
       next: (res: any) => {
+        this.loading = false;
         const ok = res?.status === 200 || res?.status === '200';
         this.summary = ok ? res : null;
       },
-      error: () => (this.summary = null),
+      error: () => {
+        this.loading = false;
+        this.summary = null;
+      },
     });
   }
 
@@ -51,7 +57,6 @@ export class AnalyticsComponent implements OnInit {
       'UnitsPurchased',
       'ClosingStock',
       'TurnoverRate',
-      'Trend',
     ];
     const lines = [header.join(',')].concat(
       rows.map((r: any) =>
@@ -61,7 +66,6 @@ export class AnalyticsComponent implements OnInit {
           r.unitsPurchased ?? 0,
           r.closingStock ?? 0,
           r.turnoverRate ?? 0,
-          JSON.stringify(r.trend || ''),
         ].join(',')
       )
     );

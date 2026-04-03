@@ -10,6 +10,7 @@
       type="button"
       class="ims-btn ims-btn-primary"
       (click)="navigateToAddProductPage()"
+      *appHasRole="['ADMIN']"
     >
       Add product
     </button>
@@ -51,6 +52,7 @@
             type="button"
             class="ims-btn ims-btn-danger"
             (click)="handleProductDelete(product.id)"
+            *appHasRole="['ADMIN']"
           >
             Delete
           </button>

@@ -7,7 +7,8 @@
       </div>
       <nav class="ims-nav">
         <div class="ims-nav-section">OVERVIEW</div>
-        <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }">
+        <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }"
+          *appHasRole="['ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <rect width="7" height="7" x="3" y="3" rx="1" />
@@ -17,7 +18,8 @@
           </svg>
           <span>Dashboard</span>
         </a>
-        <a routerLink="/transaction" routerLinkActive="active">
+        <a routerLink="/transaction" routerLinkActive="active"
+          *appHasRole="['ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <path d="m2 8 2 2 2-2" />
@@ -29,7 +31,8 @@
         </a>
 
         <div class="ims-nav-section">INVENTORY</div>
-        <a routerLink="/stock-alerts" routerLinkActive="active" class="ims-nav-item">
+        <a routerLink="/stock-alerts" routerLinkActive="active" class="ims-nav-item"
+          *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -38,7 +41,8 @@
           <span>Stock Alerts</span>
           <span class="ims-badge" *ngIf="activeAlertCount > 0">{{ activeAlertCount }}</span>
         </a>
-        <a routerLink="/product" routerLinkActive="active" *ngIf="isAdmin()" class="ims-nav-item">
+        <a routerLink="/product" routerLinkActive="active" class="ims-nav-item"
+          *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <path d="m7.5 4.27 9 5.15" />
@@ -50,7 +54,7 @@
           <span>Products</span>
           <span class="ims-badge" *ngIf="lowStockCount > 0">{{ lowStockCount }}</span>
         </a>
-        <a routerLink="/category" routerLinkActive="active" *ngIf="isAdmin()">
+        <a routerLink="/category" routerLinkActive="active" *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <rect width="7" height="7" x="3" y="3" rx="1" />
@@ -62,7 +66,7 @@
           </svg>
           <span>Category</span>
         </a>
-        <a routerLink="/suppliers" routerLinkActive="active">
+        <a routerLink="/suppliers" routerLinkActive="active" *appHasRole="['ADMIN', 'PROCUREMENT_OFFICER']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <circle cx="12" cy="12" r="10" />
@@ -73,7 +77,8 @@
         </a>
 
         <div class="ims-nav-section">OPERATIONS</div>
-        <a routerLink="/purchase-orders" routerLinkActive="active" class="ims-nav-item">
+        <a routerLink="/purchase-orders" routerLinkActive="active" class="ims-nav-item"
+          *appHasRole="['ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <path d="M7 7h10" />
@@ -84,7 +89,7 @@
           <span>Purchase Orders</span>
           <span class="ims-badge ims-badge-new">New</span>
         </a>
-        <a routerLink="/purchase" routerLinkActive="active">
+        <a routerLink="/purchase" routerLinkActive="active" *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <circle cx="12" cy="12" r="10" />
@@ -93,7 +98,7 @@
           </svg>
           <span>Receive Stock</span>
         </a>
-        <a routerLink="/sell" routerLinkActive="active">
+        <a routerLink="/sell" routerLinkActive="active" *appHasRole="['ADMIN', 'STAFF']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <circle cx="12" cy="12" r="10" />
@@ -102,8 +107,8 @@
           <span>Sell</span>
         </a>
 
-        <div class="ims-nav-section">ANALYTICS</div>
-        <a routerLink="/analytics" routerLinkActive="active" class="ims-nav-item">
+        <div class="ims-nav-section" *appHasRole="['ADMIN']">ANALYTICS</div>
+        <a routerLink="/analytics" routerLinkActive="active" class="ims-nav-item" *appHasRole="['ADMIN']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <path d="M3 3v18h18" />
@@ -139,15 +144,12 @@
     <main class="ims-main">
       <div class="ims-topbar">
         <div class="ims-topbar-left">
-          <div class="ims-search">
-            <input class="ims-search-input" type="text" placeholder="Search products, suppliers, POs..." />
-            <button type="button" class="ims-btn ims-btn-ghost ims-filter-btn">Filters</button>
-          </div>
+          <!-- Main search functionality removed -->
         </div>
         <div class="ims-topbar-right">
           <a routerLink="/stock-alerts" class="ims-bell-link" aria-label="Stock alerts">
-            <svg class="ims-bell-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="ims-bell-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>

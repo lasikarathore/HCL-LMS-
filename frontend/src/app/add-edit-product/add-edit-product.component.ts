@@ -31,6 +31,10 @@ export class AddEditProductComponent implements OnInit {
   categories: any[] = []
   message: string = ''
 
+  get isWarehouseManager(): boolean {
+    return this.apiService.isWarehouseManager();
+  }
+
 
 
   ngOnInit(): void {
@@ -97,13 +101,18 @@ export class AddEditProductComponent implements OnInit {
 
   handleSubmit(event: Event): void {
     event.preventDefault()
+    if (!this.name || !this.sku || !this.categoryId) {
+      this.showMessage("Please fill all required fields (Name, SKU, Category)");
+      return;
+    }
+
     const formData = new FormData();
     formData.append("name", this.name);
     formData.append("sku", this.sku);
-    formData.append("price", this.price);
-    formData.append("stockQuantity", this.stockQuantity);
-    formData.append("categoryId", this.categoryId);
-    formData.append("description", this.description);
+    formData.append("price", String(this.price || 0));
+    formData.append("stockQuantity", String(this.stockQuantity || 0));
+    formData.append("categoryId", String(this.categoryId));
+    formData.append("description", this.description || "");
 
     if (this.imageFile) {
       formData.append("imageFile", this.imageFile);
@@ -123,6 +132,10 @@ export class AddEditProductComponent implements OnInit {
         }
       })
     } else {
+      if (this.isWarehouseManager) {
+        this.showMessage("Warehouse Manager cannot add new products");
+        return;
+      }
       this.apiService.addProduct(formData).subscribe({
         next: (res: any) => {
           if (res.status === 200) {

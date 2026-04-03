@@ -56,7 +56,8 @@
   text-transform: uppercase;
 }
 
-.ims-nav a, .ims-nav-logout-link {
+.ims-nav a,
+.ims-nav-logout-link {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -70,7 +71,8 @@
   margin: 0 4px;
 }
 
-.ims-nav a:hover, .ims-nav-logout-link:hover {
+.ims-nav a:hover,
+.ims-nav-logout-link:hover {
   background: rgba(255, 255, 255, 0.05);
   color: #fff;
 }
@@ -92,7 +94,8 @@
   color: #7496ff;
 }
 
-.ims-nav a:hover .ims-nav-icon, .ims-nav-logout-link:hover .ims-nav-icon {
+.ims-nav a:hover .ims-nav-icon,
+.ims-nav-logout-link:hover .ims-nav-icon {
   opacity: 1;
 }
 
@@ -221,15 +224,13 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.45) 0%,
-    transparent 120px
-  );
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.45) 0%,
+      transparent 120px);
   z-index: 0;
 }
 
-.ims-main > * {
+.ims-main>* {
   position: relative;
   z-index: 1;
 }
@@ -238,6 +239,7 @@
   .ims-app-shell {
     flex-direction: column;
   }
+
   .ims-sidebar {
     width: 100%;
     height: auto;
@@ -248,15 +250,18 @@
     gap: 12px;
     padding: 16px;
   }
+
   .ims-nav {
     flex-direction: row;
     flex-wrap: wrap;
     flex: 1 1 auto;
   }
+
   .ims-sidebar-footer {
     margin-top: 0;
     width: 100%;
   }
+
   .ims-main {
     padding: 20px 16px 40px;
   }

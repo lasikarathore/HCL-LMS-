@@ -235,3 +235,26 @@ h1, h2, h3, .ims-font-display {
   background: var(--ims-pastel-mint);
   color: #2d5a45;
 }
+
+/* Loading States */
+.ims-loading-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  min-height: 200px;
+  width: 100%;
+}
+
+.ims-loader {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--ims-accent-soft);
+  border-top-color: var(--ims-accent);
+  border-radius: 50%;
+  animation: ims-spin 1s linear infinite;
+}
+
+@keyframes ims-spin {
+  to { transform: rotate(360deg); }
+}

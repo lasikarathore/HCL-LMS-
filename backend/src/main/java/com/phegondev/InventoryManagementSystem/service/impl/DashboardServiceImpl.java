@@ -7,12 +7,15 @@ import com.phegondev.InventoryManagementSystem.dto.TransactionDTO;
 import com.phegondev.InventoryManagementSystem.entity.Product;
 import com.phegondev.InventoryManagementSystem.entity.Transaction;
 import com.phegondev.InventoryManagementSystem.enums.TransactionType;
+import com.phegondev.InventoryManagementSystem.enums.UserRole;
 import com.phegondev.InventoryManagementSystem.repository.CategoryRepository;
 import com.phegondev.InventoryManagementSystem.repository.ProductRepository;
 import com.phegondev.InventoryManagementSystem.repository.SupplierRepository;
 import com.phegondev.InventoryManagementSystem.repository.TransactionRepository;
 import com.phegondev.InventoryManagementSystem.service.DashboardService;
 import com.phegondev.InventoryManagementSystem.service.TransactionTimeSeriesHelper;
+import com.phegondev.InventoryManagementSystem.service.UserService;
+import com.phegondev.InventoryManagementSystem.entity.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -36,6 +39,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final TransactionRepository transactionRepository;
     private final ModelMapper modelMapper;
     private final TransactionTimeSeriesHelper timeSeriesHelper;
+    private final UserService userService;
 
     @Value("${ims.low-stock-threshold:10}")
     private int lowStockThreshold;
@@ -54,9 +58,9 @@ public class DashboardServiceImpl implements DashboardService {
 
         List<Product> lowStockEntities = productRepository.findByStockQuantityLessThanOrderByStockQuantityAsc(
                 lowStockThreshold,
-                PageRequest.of(0, 10)
-        );
-        List<ProductDTO> lowStockProducts = modelMapper.map(lowStockEntities, new TypeToken<List<ProductDTO>>() {}.getType());
+                PageRequest.of(0, 10));
+        List<ProductDTO> lowStockProducts = modelMapper.map(lowStockEntities, new TypeToken<List<ProductDTO>>() {
+        }.getType());
         for (int i = 0; i < lowStockEntities.size(); i++) {
             Product p = lowStockEntities.get(i);
             if (p.getCategory() != null) {
@@ -65,9 +69,10 @@ public class DashboardServiceImpl implements DashboardService {
         }
 
         var recentPage = transactionRepository.findAll(
-                PageRequest.of(0, 8, Sort.by(Sort.Direction.DESC, "createdAt"))
-        );
-        List<TransactionDTO> recentDtos = modelMapper.map(recentPage.getContent(), new TypeToken<List<TransactionDTO>>() {}.getType());
+                PageRequest.of(0, 8, Sort.by(Sort.Direction.DESC, "createdAt")));
+        List<TransactionDTO> recentDtos = modelMapper.map(recentPage.getContent(),
+                new TypeToken<List<TransactionDTO>>() {
+                }.getType());
         for (int i = 0; i < recentPage.getContent().size(); i++) {
             Transaction t = recentPage.getContent().get(i);
             TransactionDTO dto = recentDtos.get(i);
@@ -80,26 +85,50 @@ public class DashboardServiceImpl implements DashboardService {
             }
         }
 
-        var seven = timeSeriesHelper.buildSevenDayWindow(LocalDate.now());
+        User currentUser = userService.getCurrentLoggedInUser();
+        UserRole role = currentUser.getRole();
+        var seven = timeSeriesHelper.buildSevenDayWindow(today);
 
-        DashboardSummaryDTO summary = DashboardSummaryDTO.builder()
-                .totalProducts(productRepository.count())
-                .totalCategories(categoryRepository.count())
-                .totalSuppliers(supplierRepository.count())
-                .inventoryValue(inventoryValue)
-                .lowStockProductCount(productRepository.countByStockQuantityLessThan(lowStockThreshold))
-                .lowStockThreshold(lowStockThreshold)
-                .salesRevenueThisMonth(nullToZero(transactionRepository.sumTotalPriceByTypeAndMonth(TransactionType.SALE, year, month)))
-                .purchaseTransactionsThisMonth(transactionRepository.countByTypeAndMonth(TransactionType.PURCHASE, year, month))
-                .saleTransactionsThisMonth(transactionRepository.countByTypeAndMonth(TransactionType.SALE, year, month))
-                .lowStockProducts(lowStockProducts)
-                .recentTransactions(recentDtos)
-                .insightCards(timeSeriesHelper.buildDashboardInsightCards(inventoryValue))
-                .sevenDayVolumeBars(timeSeriesHelper.toBarPoints(seven))
-                .sevenDayVolumeLine(timeSeriesHelper.toLinePoints(seven))
-                .categoryInventoryShare(timeSeriesHelper.categoryInventoryShareBars(6))
-                .activityDonutLast30Days(timeSeriesHelper.donutByTypeLast30Days())
-                .build();
+        DashboardSummaryDTO.DashboardSummaryDTOBuilder summaryBuilder = DashboardSummaryDTO.builder()
+                .lowStockThreshold(lowStockThreshold);
+
+        if (role == UserRole.ADMIN || role == UserRole.WAREHOUSE_MANAGER || role == UserRole.PROCUREMENT_OFFICER) {
+            summaryBuilder.inventoryValue(inventoryValue)
+                    .lowStockProductCount(productRepository.countByStockQuantityLessThan(lowStockThreshold))
+                    .lowStockProducts(lowStockProducts)
+                    .recentTransactions(recentDtos)
+                    .insightCards(timeSeriesHelper.buildDashboardInsightCards(inventoryValue))
+                    .sevenDayVolumeBars(timeSeriesHelper.toBarPoints(seven))
+                    .totalProducts(productRepository.count())
+                    .totalCategories(categoryRepository.count())
+                    .totalSuppliers(supplierRepository.count())
+                    .salesRevenueThisMonth(nullToZero(
+                            transactionRepository.sumTotalPriceByTypeAndMonth(TransactionType.SALE, year, month)))
+                    .purchaseTransactionsThisMonth(
+                            transactionRepository.countByTypeAndMonth(TransactionType.PURCHASE, year, month))
+                    .saleTransactionsThisMonth(
+                            transactionRepository.countByTypeAndMonth(TransactionType.SALE, year, month));
+
+            if (role == UserRole.ADMIN) {
+                summaryBuilder.sevenDayVolumeLine(timeSeriesHelper.toLinePoints(seven))
+                        .categoryInventoryShare(timeSeriesHelper.categoryInventoryShareBars(6))
+                        .activityDonutLast30Days(timeSeriesHelper.donutByTypeLast30Days());
+            }
+        } else if (role == UserRole.STAFF) {
+            summaryBuilder
+                    .mySalesToday(nullToZero(transactionRepository
+                            .sumTotalPriceByUserIdAndTypeAndDate(currentUser.getId(), TransactionType.SALE, today)))
+                    .myTransactionsCount(transactionRepository.countByUserId(currentUser.getId()));
+
+            // Filter recent for staff
+            recentDtos.removeIf(d -> {
+                Transaction t = transactionRepository.findById(d.getId()).orElse(null);
+                return t != null && !t.getUser().getId().equals(currentUser.getId());
+            });
+            summaryBuilder.recentTransactions(recentDtos);
+        }
+
+        DashboardSummaryDTO summary = summaryBuilder.build();
 
         return Response.builder()
                 .status(200)

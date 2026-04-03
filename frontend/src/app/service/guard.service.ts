@@ -13,28 +13,28 @@ export class GuardService implements CanActivate {
 
   canActivate(
     route: ActivatedRouteSnapshot,
-     state: RouterStateSnapshot): boolean {
+    state: RouterStateSnapshot): boolean {
 
-    const requiresAdmin = route.data['requiresAdmin'] || false;
+    const isAuthenticated = this.apiService.isAuthenticated();
+    if (!isAuthenticated) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+      return false;
+    }
 
-    if (requiresAdmin) {
-      if (this.apiService.isAdmin()) {
-        return true;
-      }else{
-        this.router.navigate(['/login'], {
-          queryParams:{returnUrl: state.url}
-        });
-        return false;
-      }
-    }else{
-      if (this.apiService.isAuthenticated()) {
-        return true;
-      }else{
-        this.router.navigate(['/login'], {
-          queryParams:{returnUrl: state.url}
-        });
-        return false; //deny access
-      }
+    const requiredRoles = route.data['roles'] as Array<string>;
+    if (!requiredRoles || requiredRoles.length === 0) {
+      return true;
+    }
+
+    const userRole = this.apiService.getRole();
+    const hasRole = userRole && requiredRoles.includes(userRole);
+
+    if (hasRole) {
+      return true;
+    } else {
+      // User is authenticated but doesn't have the right role
+      this.router.navigate(['/dashboard']);
+      return false;
     }
   }
 }

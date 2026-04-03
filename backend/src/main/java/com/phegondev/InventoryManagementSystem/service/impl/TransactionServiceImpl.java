@@ -12,6 +12,7 @@ import com.phegondev.InventoryManagementSystem.entity.Transaction;
 import com.phegondev.InventoryManagementSystem.entity.User;
 import com.phegondev.InventoryManagementSystem.enums.TransactionStatus;
 import com.phegondev.InventoryManagementSystem.enums.TransactionType;
+import com.phegondev.InventoryManagementSystem.enums.UserRole;
 import com.phegondev.InventoryManagementSystem.exceptions.NameValueRequiredException;
 import com.phegondev.InventoryManagementSystem.exceptions.NotFoundException;
 import com.phegondev.InventoryManagementSystem.repository.ProductRepository;
@@ -30,6 +31,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.phegondev.InventoryManagementSystem.repository.SupplierProfileRepository;
+import com.phegondev.InventoryManagementSystem.exceptions.ConflictException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -50,6 +54,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final ModelMapper modelMapper;
     private final SupplierRepository supplierRepository;
+    private final SupplierProfileRepository supplierProfileRepository;
     private final UserService userService;
     private final ProductRepository productRepository;
     private final TransactionTimeSeriesHelper timeSeriesHelper;
@@ -58,6 +63,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     @Override
+    @Transactional
     public Response restockInventory(TransactionRequest transactionRequest) {
 
         Long productId = transactionRequest.getProductId();
@@ -71,6 +77,14 @@ public class TransactionServiceImpl implements TransactionService {
 
         Supplier supplier = supplierRepository.findById(supplierId)
                 .orElseThrow(()-> new NotFoundException("Supplier Not Found"));
+
+        // Check if supplier is active via profile
+        supplierProfileRepository.findBySupplier_Id(supplier.getId()).ifPresent(profile -> {
+            if (profile.getActive() != null && !profile.getActive()) {
+                throw new ConflictException(
+                        "Supplier '" + supplier.getName() + "' is currently INACTIVE and cannot be used for restock.");
+            }
+        });
 
         User user = userService.getCurrentLoggedInUser();
 
@@ -104,6 +118,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Transactional
     public Response sell(TransactionRequest transactionRequest) {
 
         Long productId = transactionRequest.getProductId();
@@ -115,6 +130,11 @@ public class TransactionServiceImpl implements TransactionService {
 
 
         User user = userService.getCurrentLoggedInUser();
+
+        // Validate stock availability
+        if (product.getStockQuantity() < quantity) {
+            throw new RuntimeException("Insufficient stock for product: " + product.getName());
+        }
 
         //update the stock quantity and re-save
         product.setStockQuantity(product.getStockQuantity() - quantity);
@@ -156,6 +176,14 @@ public class TransactionServiceImpl implements TransactionService {
         Supplier supplier = supplierRepository.findById(supplierId)
                 .orElseThrow(()-> new NotFoundException("Supplier Not Found"));
 
+        // Check if supplier is active via profile
+        supplierProfileRepository.findBySupplier_Id(supplier.getId()).ifPresent(profile -> {
+            if (profile.getActive() != null && !profile.getActive()) {
+                throw new ConflictException(
+                        "Supplier '" + supplier.getName() + "' is currently INACTIVE and cannot be used for returns.");
+            }
+        });
+
         User user = userService.getCurrentLoggedInUser();
 
         //update the stock quantity and re-save
@@ -185,13 +213,20 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Response getAllTransactions(int page, int size, String searchText, TransactionType transactionType) {
+    public Response getAllTransactions(int page, int size, String searchText, TransactionType transactionType, String status) {
+        User current = userService.getCurrentLoggedInUser();
+        Long userId = (current.getRole() == UserRole.STAFF) ? current.getId() : null;
 
         // Native search query orders by id in SQL; avoid extra ORDER BY from Pageable (invalid on native queries).
         Pageable pageable = PageRequest.of(page, size);
         String st = (searchText == null || searchText.isBlank()) ? null : searchText.trim();
+        
+        // If no type is specified, we exclude PURCHASE to keep inward history localized to its specific view.
+        // If PURCHASE is explicitly requested (e.g. from PurchaseComponent), we use it.
         String tx = transactionType == null ? null : transactionType.name();
-        Page<Transaction> transactionPage = transactionRepository.pageTransactionsFiltered(tx, st, pageable);
+        
+        String ts = (status == null || status.isBlank()) ? null : status.trim();
+        Page<Transaction> transactionPage = transactionRepository.pageTransactionsFiltered(tx, st, ts, userId, pageable);
 
         List<TransactionDTO> transactionDTOS = modelMapper
                 .map(transactionPage.getContent(), new TypeToken<List<TransactionDTO>>() {}.getType());

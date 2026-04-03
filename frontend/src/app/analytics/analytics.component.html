@@ -22,7 +22,11 @@
     </div>
   </header>
 
-  <section class="an-kpis" *ngIf="summary">
+  <div class="ims-loading-overlay" *ngIf="loading">
+    <div class="ims-loader"></div>
+  </div>
+
+  <section class="an-kpis" *ngIf="summary && !loading">
     <article class="kpi-mini ims-card pastel-sky">
       <span class="kpi-mini-label">Revenue</span>
       <strong>{{ summary.revenue | currency : 'INR' : 'symbol' : '1.0-0' }}</strong>
@@ -96,7 +100,6 @@
             <th>Units Purchased</th>
             <th>Closing Stock</th>
             <th>Turnover Rate</th>
-            <th>Trend</th>
           </tr>
         </thead>
         <tbody>
@@ -106,9 +109,6 @@
             <td>{{ r.unitsPurchased }}</td>
             <td>{{ r.closingStock }}</td>
             <td>{{ r.turnoverRate }}</td>
-            <td>
-              <span [class.up]="r.trend==='up'" [class.down]="r.trend==='down'">{{ r.trend }}</span>
-            </td>
           </tr>
         </tbody>
       </table>

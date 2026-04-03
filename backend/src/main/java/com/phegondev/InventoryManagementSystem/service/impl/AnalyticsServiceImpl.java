@@ -33,7 +33,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 yield new LocalDateTime[]{first.atStartOfDay(), first.plusMonths(1).atStartOfDay()};
             }
             case "THIS_QUARTER" -> {
-                int q = (today.getMonthValue() - 1) / 3; // 0..3
+                int q = (today.getMonthValue() - 1) / 3;
                 int startMonth = q * 3 + 1;
                 LocalDate first = LocalDate.of(today.getYear(), startMonth, 1);
                 yield new LocalDateTime[]{first.atStartOfDay(), first.plusMonths(3).atStartOfDay()};
@@ -41,10 +41,6 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             case "THIS_YEAR" -> {
                 LocalDate first = LocalDate.of(today.getYear(), 1, 1);
                 yield new LocalDateTime[]{first.atStartOfDay(), first.plusYears(1).atStartOfDay()};
-            }
-            case "THIS_MONTH" -> {
-                LocalDate first = today.withDayOfMonth(1);
-                yield new LocalDateTime[]{first.atStartOfDay(), first.plusMonths(1).atStartOfDay()};
             }
             default -> {
                 LocalDate first = today.withDayOfMonth(1);
@@ -65,23 +61,20 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         LocalDateTime since = win[0];
         LocalDateTime until = win[1];
 
-        // Revenue (sales) + purchases in range.
+        // 1. KPI Aggregation (Sales, Purchases, Inventory Value)
         BigDecimal revenue = BigDecimal.ZERO;
         BigDecimal purchases = BigDecimal.ZERO;
-        for (Object[] row : transactionRepository.sumByTypeSince(since)) {
-            // this query is "since" only; we'll compute by filtering trend window for KPI accuracy using dailyStatsBetween
-        }
-        // KPI accuracy via dailyStatsBetween (windowed)
-        for (Object[] row : transactionRepository.dailyStatsBetween(since, until)) {
-            // row: date, sales_sum, total_sum, count
+        
+        // aggregate daily sums for the window
+        List<Object[]> dailyStats = transactionRepository.dailyStatsBetween(since, until);
+        for (Object[] row : dailyStats) {
             BigDecimal sales = row[1] == null ? BigDecimal.ZERO : (BigDecimal) row[1];
             BigDecimal total = row[2] == null ? BigDecimal.ZERO : (BigDecimal) row[2];
             revenue = revenue.add(sales);
-            // purchases approximated: total - sales (since total includes all types)
+            // Purchases approximated as total - sales (includes returns, but works as a conservative inward cost proxy)
             purchases = purchases.add(total.subtract(sales));
         }
 
-        // Gross profit (simple): sales - purchases (in same window)
         BigDecimal grossProfit = revenue.subtract(purchases);
         int grossMargin = revenue.signum() == 0 ? 0 : grossProfit.multiply(BigDecimal.valueOf(100))
                 .divide(revenue, java.math.RoundingMode.HALF_UP).intValue();
@@ -89,27 +82,18 @@ public class AnalyticsServiceImpl implements AnalyticsService {
         BigDecimal inventoryValue = productRepository.sumInventoryValue();
         if (inventoryValue == null) inventoryValue = BigDecimal.ZERO;
 
-        // Turnover (simple proxy): units sold / average stock (approx)
-        double totalUnitsSold = 0;
-        List<Object[]> byProduct = transactionRepository.unitsSoldPurchasedByProductBetween(since, until);
-        for (Object[] r : byProduct) {
-            totalUnitsSold += ((Number) r[2]).doubleValue();
-        }
-        long productCount = productRepository.count();
-        double avgStock = 0;
-        if (productCount > 0) {
-            List<Product> all = productRepository.findAll();
-            double sumStock = 0;
-            for (Product p : all) sumStock += (p.getStockQuantity() == null ? 0 : p.getStockQuantity());
-            avgStock = sumStock / productCount;
-        }
-        double turnoverRate = avgStock <= 0 ? 0.0 : (totalUnitsSold / avgStock);
-        double industryAvg = 2.8;
+        // 2. Trend Chart (Adaptive Window)
+        // If THIS_YEAR, show from Jan 1st. Otherwise show last 6 months to give context.
+        LocalDate startOfTrend = range.equalsIgnoreCase("THIS_YEAR") 
+                ? LocalDate.now().withDayOfMonth(1).withMonth(1) 
+                : LocalDate.now().withDayOfMonth(1).minusMonths(5);
+        LocalDateTime trendSince = startOfTrend.atStartOfDay();
+        
+        // For trend until, we show up to the end of the current selection's window or at least current month
+        LocalDateTime trendUntil = until.isAfter(LocalDateTime.now()) ? until : LocalDate.now().plusMonths(1).withDayOfMonth(1).atStartOfDay();
 
-        // Trend: last 6 months side-by-side bars.
-        LocalDateTime trendSince = LocalDate.now().withDayOfMonth(1).minusMonths(5).atStartOfDay();
         List<Map<String, Object>> trend = new ArrayList<>();
-        for (Object[] r : transactionRepository.monthlySalesVsPurchasesSince(trendSince)) {
+        for (Object[] r : transactionRepository.monthlySalesVsPurchasesBetween(trendSince, trendUntil)) {
             LocalDateTime monthStart = ((java.sql.Timestamp) r[0]).toLocalDateTime();
             BigDecimal sales = r[1] == null ? BigDecimal.ZERO : (BigDecimal) r[1];
             BigDecimal pur = r[2] == null ? BigDecimal.ZERO : (BigDecimal) r[2];
@@ -120,7 +104,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             trend.add(m);
         }
 
-        // Category performance (revenue + percent)
+        // 3. Category & Turnover performance
         List<Object[]> catRows = transactionRepository.revenueByCategoryBetween(since, until);
         BigDecimal totalCatRevenue = BigDecimal.ZERO;
         for (Object[] r : catRows) {
@@ -139,27 +123,40 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             analyticsCategories.add(m);
         }
 
-        // Inventory turnover table rows
         List<Map<String, Object>> rows = new ArrayList<>();
+        List<Object[]> byProduct = transactionRepository.unitsSoldPurchasedByProductBetween(since, until);
+        double totalUnitsSold = 0;
         for (Object[] r : byProduct) {
             Long pid = ((Number) r[0]).longValue();
             String pname = (String) r[1];
             int sold = ((Number) r[2]).intValue();
             int purchasedUnits = ((Number) r[3]).intValue();
+            totalUnitsSold += sold;
+
             Product p = productRepository.findById(pid).orElse(null);
             int closing = p == null || p.getStockQuantity() == null ? 0 : p.getStockQuantity();
             double rate = closing <= 0 ? sold : ((double) sold / (double) closing);
+
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("product", pname);
             m.put("unitsSold", sold);
             m.put("unitsPurchased", purchasedUnits);
             m.put("closingStock", closing);
             m.put("turnoverRate", Math.round(rate * 10.0) / 10.0);
-            m.put("trend", "→");
             rows.add(m);
         }
 
-        // Supplier performance analytics (star rating bars)
+        long productCount = productRepository.count();
+        double avgStock = 0;
+        if (productCount > 0) {
+            double sumStock = productRepository.findAll().stream()
+                    .mapToDouble(p -> p.getStockQuantity() == null ? 0 : p.getStockQuantity())
+                    .sum();
+            avgStock = sumStock / productCount;
+        }
+        double turnoverRate = avgStock <= 0 ? 0.0 : (totalUnitsSold / avgStock);
+
+        // 4. Supplier Analytics
         List<Map<String, Object>> analyticsSuppliers = new ArrayList<>();
         supplierMetricsRepository.findAll().forEach(sm -> {
             Map<String, Object> m = new LinkedHashMap<>();
@@ -168,7 +165,16 @@ public class AnalyticsServiceImpl implements AnalyticsService {
             analyticsSuppliers.add(m);
         });
 
-        String insight = "Analytics Insight: Inventory turnover improved this month. Review high-velocity categories and reorder fast-moving SKUs.";
+        // 5. Dynamic Insights
+        String periodName = range.replace("_", " ").toLowerCase();
+        String insight = String.format("Performance insight for %s: ", periodName);
+        if (revenue.compareTo(purchases) > 0) {
+            insight += "Positive cash flow detected. Revenue exceeds procurement costs by " + formatMoney(revenue.subtract(purchases)) + ".";
+        } else if (revenue.signum() > 0) {
+            insight += "Procurement heavy period. Inventory investment is currently higher than conversion.";
+        } else {
+            insight += "No significant transaction volume detected in this period.";
+        }
 
         return Response.builder()
                 .status(200)
@@ -178,7 +184,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 .grossMargin(grossMargin)
                 .inventoryValue(inventoryValue)
                 .turnoverRate(Math.round(turnoverRate * 10.0) / 10.0)
-                .industryAvg(industryAvg)
+                .industryAvg(2.8)
                 .trend(trend)
                 .analyticsCategories(analyticsCategories)
                 .rows(rows)
@@ -186,5 +192,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 .insight(insight)
                 .build();
     }
-}
 
+    private String formatMoney(BigDecimal val) {
+        return "₹" + String.format("%,.0f", val);
+    }
+}

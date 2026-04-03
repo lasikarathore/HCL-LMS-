@@ -36,10 +36,18 @@ export class PurchaseOrdersComponent implements OnInit {
   };
 
   constructor(
-    private apiService: ApiService,
+    public apiService: ApiService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
+
+  get isAdmin(): boolean {
+    return this.apiService.isAdmin();
+  }
+
+  get isWarehouseManager(): boolean {
+    return this.apiService.isWarehouseManager();
+  }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe((p) => {
@@ -60,7 +68,10 @@ export class PurchaseOrdersComponent implements OnInit {
 
   loadSuppliersProducts(): void {
     this.apiService.getAllSuppliers().subscribe({
-      next: (res: any) => (this.suppliers = res?.suppliers || []),
+      next: (res: any) => {
+        const all = res?.suppliers || [];
+        this.suppliers = all.filter((s: any) => s.active !== false);
+      },
       error: () => {},
     });
     this.apiService.getAllProducts().subscribe({

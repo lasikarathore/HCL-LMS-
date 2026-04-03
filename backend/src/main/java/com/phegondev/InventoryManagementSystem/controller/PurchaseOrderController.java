@@ -17,22 +17,25 @@ public class PurchaseOrderController {
     private final PurchaseOrderService purchaseOrderService;
 
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER')")
     public ResponseEntity<Response> list(@RequestParam(required = false) String status) {
         return ResponseEntity.ok(purchaseOrderService.listPurchaseOrders(status));
     }
 
     @GetMapping("/summary")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER')")
     public ResponseEntity<Response> summary() {
         return ResponseEntity.ok(purchaseOrderService.summary());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER')")
     public ResponseEntity<Response> get(@PathVariable Long id) {
         return ResponseEntity.ok(purchaseOrderService.getPurchaseOrder(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'PROCUREMENT_OFFICER')")
     public ResponseEntity<Response> create(@RequestBody @Valid PurchaseOrderCreateRequest req) {
         return ResponseEntity.ok(purchaseOrderService.createPurchaseOrder(req));
     }
@@ -44,7 +47,7 @@ public class PurchaseOrderController {
     }
 
     @PutMapping("/{id}/receive")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'WAREHOUSE_MANAGER')")
     public ResponseEntity<Response> receive(@PathVariable Long id) {
         return ResponseEntity.ok(purchaseOrderService.receivePurchaseOrder(id));
     }
