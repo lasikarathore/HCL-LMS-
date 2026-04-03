@@ -19,6 +19,10 @@ export class SellComponent implements OnInit {
   quantity = '';
   message = '';
   recentSales: any[] = [];
+  isStockInsufficient = false;
+  isOutOfStock = false;
+  isLowStock = false;
+  availableStock = 0;
 
   ngOnInit(): void {
     this.fetchProducts();
@@ -30,10 +34,39 @@ export class SellComponent implements OnInit {
       (x) => String(x.id) === String(this.productId)
     );
     const q = parseInt(this.quantity, 10);
+    
+    if (p) {
+      this.availableStock = p.stockQuantity;
+      this.isStockInsufficient = q > p.stockQuantity;
+      this.isOutOfStock = p.stockQuantity === 0;
+      this.isLowStock = p.stockQuantity > 0 && p.stockQuantity < 5;
+    } else {
+      this.isStockInsufficient = false;
+      this.isOutOfStock = false;
+      this.isLowStock = false;
+    }
+
     if (!p || Number.isNaN(q) || q < 1) {
       return 0;
     }
     return Number(p.price) * q;
+  }
+
+  onProductChange(): void {
+    const p = this.products.find(
+      (x) => String(x.id) === String(this.productId)
+    );
+    if (p) {
+      this.availableStock = p.stockQuantity;
+      this.isOutOfStock = p.stockQuantity === 0;
+      this.isLowStock = p.stockQuantity > 0 && p.stockQuantity < 5;
+      if (this.isOutOfStock) {
+        this.quantity = '';
+      }
+    } else {
+      this.isOutOfStock = false;
+      this.isLowStock = false;
+    }
   }
 
   loadRecentSales(): void {

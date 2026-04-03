@@ -179,6 +179,13 @@ export class ApiService {
     });
   }
 
+  updateSupplierStatus(id: string | number, status: string): Observable<any> {
+    return this.http.patch(`${ApiService.BASE_URL}/suppliers/${id}/status`, null, {
+      headers: this.getHeader(),
+      params: { status }
+    });
+  }
+
 
 
 

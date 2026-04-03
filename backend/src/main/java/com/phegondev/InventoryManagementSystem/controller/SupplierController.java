@@ -43,5 +43,9 @@ public class SupplierController {
         return ResponseEntity.ok(supplierService.deleteSupplier(id));
     }
 
-
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Response> updateSupplierStatus(@PathVariable Long id, @RequestParam String status) {
+        return ResponseEntity.ok(supplierService.updateSupplierStatus(id, status));
+    }
 }

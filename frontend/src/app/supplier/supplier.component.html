@@ -96,12 +96,27 @@
           <td class="mono">{{ s.onTimeDeliveryPercent || 0 }}%</td>
           <td class="mono">{{ s.itemsSupplied || 0 }}</td>
           <td>
-            <span class="ims-pill" [ngClass]="s.active === false ? 'pill-inactive' : 'pill-active'">
-              {{ s.active === false ? 'Inactive' : 'Active' }}
-            </span>
+            <div *ngIf="isAdmin; else readOnlyStatus">
+              <label class="ims-toggle">
+                <input
+                  type="checkbox"
+                  [checked]="s.status === 'ACTIVE'"
+                  (change)="toggleStatus(s)"
+                />
+                <span class="ims-slider"></span>
+              </label>
+              <span class="ims-pill" [ngClass]="s.status === 'INACTIVE' ? 'pill-inactive' : 'pill-active'">
+                {{ s.status }}
+              </span>
+            </div>
+            <ng-template #readOnlyStatus>
+              <span class="ims-pill" [ngClass]="s.status === 'INACTIVE' ? 'pill-inactive' : 'pill-active'">
+                {{ s.status || 'ACTIVE' }}
+              </span>
+            </ng-template>
           </td>
           <td class="sup-actions">
-            <button type="button" class="ims-btn ims-btn-ghost" (click)="navigateToEditSupplierPage(s.id)">View</button>
+            <button type="button" class="ims-btn ims-btn-ghost" (click)="navigateToEditSupplierPage(s.id)">Edit</button>
             <button type="button" class="ims-btn ims-btn-danger" (click)="handleDeleteSupplier(s.id)">Delete</button>
           </td>
         </tr>

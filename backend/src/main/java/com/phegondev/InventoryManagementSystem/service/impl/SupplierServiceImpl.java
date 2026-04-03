@@ -13,7 +13,6 @@ import com.phegondev.InventoryManagementSystem.service.SupplierService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +31,7 @@ public class SupplierServiceImpl implements SupplierService {
 
     private SupplierDTO toDto(Supplier supplier) {
         SupplierDTO dto = modelMapper.map(supplier, SupplierDTO.class);
+        dto.setStatus(supplier.getStatus());
         supplierProfileRepository.findBySupplier_Id(supplier.getId()).ifPresent(p -> {
             dto.setEmail(p.getEmail());
             dto.setCategorySpecialisation(p.getCategorySpecialisation());
@@ -51,6 +51,11 @@ public class SupplierServiceImpl implements SupplierService {
     @Override
     public Response addSupplier(SupplierDTO supplierDTO) {
         Supplier supplierToSave = modelMapper.map(supplierDTO, Supplier.class);
+        if (supplierDTO.getStatus() != null) {
+            supplierToSave.setStatus(supplierDTO.getStatus());
+        } else {
+            supplierToSave.setStatus("ACTIVE");
+        }
         supplierRepository.save(supplierToSave);
 
         SupplierProfile profile = SupplierProfile.builder()
@@ -81,6 +86,7 @@ public class SupplierServiceImpl implements SupplierService {
 
         if (supplierDTO.getName() != null) existingSupplier.setName(supplierDTO.getName());
         if (supplierDTO.getAddress() != null) existingSupplier.setAddress(supplierDTO.getAddress());
+        if (supplierDTO.getStatus() != null) existingSupplier.setStatus(supplierDTO.getStatus());
 
         supplierRepository.save(existingSupplier);
 
@@ -141,6 +147,25 @@ public class SupplierServiceImpl implements SupplierService {
         return Response.builder()
                 .status(200)
                 .message("Supplier Successfully Deleted")
+                .build();
+    }
+
+    @Override
+    public Response updateSupplierStatus(Long id, String status) {
+        Supplier supplier = supplierRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Supplier Not Found"));
+        supplier.setStatus(status);
+        supplierRepository.save(supplier);
+
+        // Sync with SupplierProfile.active if needed
+        supplierProfileRepository.findBySupplier_Id(id).ifPresent(p -> {
+            p.setActive("ACTIVE".equalsIgnoreCase(status));
+            supplierProfileRepository.save(p);
+        });
+
+        return Response.builder()
+                .status(200)
+                .message("Supplier status updated to " + status)
                 .build();
     }
 }

@@ -14,13 +14,31 @@
         <h2>New sale</h2>
         <p>Pricing and stock come from the selected SKU</p>
       </div>
+
+      <!-- NEW: Stock Insufficient Alert -->
+      <div class="ims-alert ims-alert-danger shake" *ngIf="isOutOfStock">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>⚠️ OUT OF STOCK: This item cannot be sold until restocked.</span>
+      </div>
+
+      <div class="ims-alert ims-alert-danger" *ngIf="isStockInsufficient && !isOutOfStock">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Insufficient Stock. Only <strong>{{ availableStock }}</strong> units available.</span>
+      </div>
+
+      <div class="ims-alert ims-alert-warning" *ngIf="isLowStock && !isStockInsufficient">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span>Low Stock: Only <strong>{{ availableStock }}</strong> units remaining.</span>
+      </div>
+
       <form (ngSubmit)="handleSubmit()" class="stack-form">
-        <div>
+        <div [class.out-of-stock-border]="isOutOfStock">
           <label class="ims-label">Product</label>
           <select
             class="ims-select"
             name="productId"
             [(ngModel)]="productId"
+            (ngModelChange)="onProductChange()"
             required
           >
             <option value="">Select product</option>
@@ -38,6 +56,7 @@
             min="1"
             [(ngModel)]="quantity"
             name="quantity"
+            [disabled]="isOutOfStock"
             required
           />
         </div>
@@ -55,7 +74,7 @@
             placeholder="Optional reference"
           />
         </div>
-        <button type="submit" class="ims-btn ims-btn-primary wide">
+        <button type="submit" class="ims-btn ims-btn-primary wide" [disabled]="isStockInsufficient || isOutOfStock">
           Complete sale
         </button>
       </form>

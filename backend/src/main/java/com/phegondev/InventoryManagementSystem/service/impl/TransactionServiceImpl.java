@@ -32,8 +32,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.phegondev.InventoryManagementSystem.repository.SupplierProfileRepository;
-import com.phegondev.InventoryManagementSystem.exceptions.ConflictException;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -54,7 +53,6 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final ModelMapper modelMapper;
     private final SupplierRepository supplierRepository;
-    private final SupplierProfileRepository supplierProfileRepository;
     private final UserService userService;
     private final ProductRepository productRepository;
     private final TransactionTimeSeriesHelper timeSeriesHelper;
@@ -78,13 +76,9 @@ public class TransactionServiceImpl implements TransactionService {
         Supplier supplier = supplierRepository.findById(supplierId)
                 .orElseThrow(()-> new NotFoundException("Supplier Not Found"));
 
-        // Check if supplier is active via profile
-        supplierProfileRepository.findBySupplier_Id(supplier.getId()).ifPresent(profile -> {
-            if (profile.getActive() != null && !profile.getActive()) {
-                throw new ConflictException(
-                        "Supplier '" + supplier.getName() + "' is currently INACTIVE and cannot be used for restock.");
-            }
-        });
+        if ("INACTIVE".equalsIgnoreCase(supplier.getStatus())) {
+            throw new RuntimeException("Validation Failed: This supplier is INACTIVE and cannot be used for transactions.");
+        }
 
         User user = userService.getCurrentLoggedInUser();
 
@@ -162,6 +156,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Transactional
     public Response returnToSupplier(TransactionRequest transactionRequest) {
 
         Long productId = transactionRequest.getProductId();
@@ -176,13 +171,9 @@ public class TransactionServiceImpl implements TransactionService {
         Supplier supplier = supplierRepository.findById(supplierId)
                 .orElseThrow(()-> new NotFoundException("Supplier Not Found"));
 
-        // Check if supplier is active via profile
-        supplierProfileRepository.findBySupplier_Id(supplier.getId()).ifPresent(profile -> {
-            if (profile.getActive() != null && !profile.getActive()) {
-                throw new ConflictException(
-                        "Supplier '" + supplier.getName() + "' is currently INACTIVE and cannot be used for returns.");
-            }
-        });
+        if ("INACTIVE".equalsIgnoreCase(supplier.getStatus())) {
+            throw new RuntimeException("Validation Failed: This supplier is INACTIVE and cannot be used for transactions.");
+        }
 
         User user = userService.getCurrentLoggedInUser();
 

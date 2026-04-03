@@ -22,6 +22,32 @@ export class SupplierComponent implements OnInit {
     return '★★★★★'.slice(0, full) + '☆☆☆☆☆'.slice(0, 5 - full);
   }
 
+  get isAdmin(): boolean {
+    return this.apiService.isAdmin();
+  }
+
+  get isProcurementOfficer(): boolean {
+    return this.apiService.isProcurementOfficer();
+  }
+
+  toggleStatus(supplier: any): void {
+    const newStatus = supplier.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    this.apiService.updateSupplierStatus(supplier.id, newStatus).subscribe({
+      next: (res: any) => {
+        if (res.status === 200) {
+          supplier.status = newStatus;
+          this.showMessage(`Supplier marked as ${newStatus}`);
+          this.loadSummary();
+        } else {
+          this.showMessage(res.message || 'Error updating status');
+        }
+      },
+      error: (err) => {
+        this.showMessage(err?.error?.message || err?.message || 'Error updating status');
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.loadSummary();
     this.getSuppliers();

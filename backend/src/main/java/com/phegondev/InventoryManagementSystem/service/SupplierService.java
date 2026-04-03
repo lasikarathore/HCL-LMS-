@@ -9,4 +9,5 @@ public interface SupplierService {
     Response getAllSuppliers();
     Response getSupplierById(Long id);
     Response deleteSupplier(Long id);
+    Response updateSupplierStatus(Long id, String status);
 }

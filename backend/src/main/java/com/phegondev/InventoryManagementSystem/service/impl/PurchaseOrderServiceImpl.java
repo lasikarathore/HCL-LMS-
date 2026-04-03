@@ -36,7 +36,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     private final SupplierRepository supplierRepository;
     private final ProductRepository productRepository;
     private final TransactionRepository transactionRepository;
-    private final com.phegondev.InventoryManagementSystem.repository.SupplierProfileRepository supplierProfileRepository;
     private final com.phegondev.InventoryManagementSystem.service.UserService userService;
     private final StockAlertService stockAlertService;
 
@@ -90,13 +89,9 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         Supplier supplier = supplierRepository.findById(req.getSupplierId())
                 .orElseThrow(() -> new NotFoundException("Supplier Not Found"));
 
-        // Check if supplier is active via profile
-        supplierProfileRepository.findBySupplier_Id(supplier.getId()).ifPresent(profile -> {
-            if (profile.getActive() != null && !profile.getActive()) {
-                throw new com.phegondev.InventoryManagementSystem.exceptions.ConflictException(
-                        "Supplier '" + supplier.getName() + "' is currently INACTIVE and cannot be used for new orders.");
-            }
-        });
+        if ("INACTIVE".equalsIgnoreCase(supplier.getStatus())) {
+            throw new RuntimeException("Validation Failed: This supplier is INACTIVE and cannot be used for transactions.");
+        }
 
         Product product = productRepository.findById(req.getProductId())
                 .orElseThrow(() -> new NotFoundException("Product Not Found"));

@@ -22,6 +22,8 @@ public class SupplierDTO {
 
     private String address;
 
+    private String status;
+
     // Enhanced supplier management fields (stored in SupplierProfile)
     private String email;
     private String categorySpecialisation;

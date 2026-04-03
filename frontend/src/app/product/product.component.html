@@ -45,6 +45,7 @@
             type="button"
             class="ims-btn ims-btn-ghost"
             (click)="navigateToEditProductPage(product.id)"
+            *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER']"
           >
             Edit
           </button>

@@ -70,7 +70,7 @@ export class PurchaseOrdersComponent implements OnInit {
     this.apiService.getAllSuppliers().subscribe({
       next: (res: any) => {
         const all = res?.suppliers || [];
-        this.suppliers = all.filter((s: any) => s.active !== false);
+        this.suppliers = all.filter((s: any) => s.status === 'ACTIVE');
       },
       error: () => {},
     });

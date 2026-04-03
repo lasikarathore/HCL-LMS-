@@ -38,6 +38,7 @@ public class SupplierManagementServiceImpl implements SupplierManagementService 
                 .totalPurchaseValue(m != null ? m.getTotalPurchaseValue() : BigDecimal.ZERO)
                 .categorySpecialisation(m != null ? m.getCategorySpecialisation() : null)
                 .paymentTerms(m != null ? m.getPaymentTerms() : null)
+                .status(s.getStatus())
                 .build();
     }
 
@@ -115,11 +116,15 @@ public class SupplierManagementServiceImpl implements SupplierManagementService 
             if (dto.getAddress() != null) {
                 supplier.setAddress(dto.getAddress());
             }
+            if (dto.getStatus() != null) {
+                supplier.setStatus(dto.getStatus());
+            }
             supplierRepository.save(supplier);
         } else {
             supplier = Supplier.builder()
                     .name(dto.getName())
                     .address(dto.getAddress())
+                    .status(dto.getStatus() != null ? dto.getStatus() : "ACTIVE")
                     .build();
             supplier = supplierRepository.save(supplier);
         }
@@ -135,7 +140,12 @@ public class SupplierManagementServiceImpl implements SupplierManagementService 
         metrics.setPaymentTerms(dto.getPaymentTerms());
         metrics.setStarRating(dto.getStarRating());
         metrics.setOnTimeDeliveryPercent(dto.getOnTimeDeliveryPercent());
-        metrics.setActive(dto.getActive() == null ? true : dto.getActive());
+        // Sync active with status if status is provided
+        if (dto.getStatus() != null) {
+            metrics.setActive("ACTIVE".equalsIgnoreCase(dto.getStatus()));
+        } else {
+            metrics.setActive(dto.getActive() == null ? true : dto.getActive());
+        }
         metrics.setTotalPurchaseValue(dto.getTotalPurchaseValue() == null ? BigDecimal.ZERO : dto.getTotalPurchaseValue());
         metrics.setUpdatedAt(LocalDateTime.now());
         supplierMetricsRepository.save(metrics);

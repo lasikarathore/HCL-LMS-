@@ -25,5 +25,6 @@ public class SupplierManagementDTO {
     private BigDecimal totalPurchaseValue;
     private String categorySpecialisation;
     private String paymentTerms;
+    private String status;
 }
 

@@ -22,6 +22,7 @@ export class PurchaseComponent implements OnInit {
   approvedPOs: any[] = []; // NEW: for PO selection
   productId = '';
   supplierId = '';
+  selectedSupplier: any = null;
   poId = '';
   description = '';
   quantity = '';
@@ -62,10 +63,18 @@ export class PurchaseComponent implements OnInit {
     }
     const po = this.approvedPOs.find(p => String(p.id) === id);
     if (po) {
-      this.productId = String(po.supplierId == null ? '' : po.items[0]?.productId || '');
+      this.productId = String(po.productId || po.items?.[0]?.productId || '');
       this.supplierId = String(po.supplierId || '');
-      this.quantity = String(po.items[0]?.quantity || '');
+      this.onSupplierChange(this.supplierId);
+      this.quantity = String(po.quantity || po.items?.[0]?.quantity || '');
       this.description = `PO Receipt: ${po.poNumber}`;
+    }
+  }
+
+  onSupplierChange(id: string) {
+    this.selectedSupplier = this.suppliers.find(s => String(s.id) === id);
+    if (this.selectedSupplier?.status === 'INACTIVE') {
+      this.showMessage('Error: Supplier is Blacklisted/Inactive.');
     }
   }
 
@@ -108,7 +117,7 @@ export class PurchaseComponent implements OnInit {
       next: (res: any) => {
         if (res.status === 200) {
           const all = res.suppliers || [];
-          this.suppliers = all.filter((s: any) => s.active !== false);
+          this.suppliers = all.filter((s: any) => s.status === 'ACTIVE');
         }
       },
       error: (error) => {
@@ -133,11 +142,16 @@ export class PurchaseComponent implements OnInit {
   handleSubmit(): void {
     // 1. If we have a PO ID, we follow the "Receive PO" workflow
     if (this.poId) {
+      if (this.selectedSupplier?.status === 'INACTIVE') {
+        this.showMessage("Error: Cannot receive from an INACTIVE supplier.");
+        return;
+      }
       this.apiService.receivePurchaseOrder(this.poId).subscribe({
         next: (res: any) => {
           if (res?.status === 200) {
             this.showMessage("PO Received successfully, stock updated");
             this.resetForm();
+            this.fetchProductsAndSuppliers();
             this.loadRecentPurchases();
           } else {
             this.showMessage(res?.message || "Unable to receive PO");
@@ -165,6 +179,7 @@ export class PurchaseComponent implements OnInit {
         if (res.status === 200) {
           this.showMessage(res.message);
           this.resetForm();
+          this.fetchProductsAndSuppliers();
           this.loadRecentPurchases();
         }
       },
@@ -181,6 +196,7 @@ export class PurchaseComponent implements OnInit {
   resetForm(): void {
     this.productId = '';
     this.supplierId = '';
+    this.selectedSupplier = null;
     this.poId = '';
     this.description = '';
     this.quantity = '';
