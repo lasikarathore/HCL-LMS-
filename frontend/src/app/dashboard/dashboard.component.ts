@@ -28,6 +28,7 @@ export class DashboardComponent implements OnInit {
   chartScheme = IMS_CHART_SCHEME;
   schemeType = ScaleType.Ordinal;
   mainChartView: [number, number] = [720, 360];
+  staffChartView: [number, number] = [1100, 400];
   donutView: [number, number] = [250, 300];
   donutLegendPosition = LegendPosition.Below;
 
@@ -90,6 +91,19 @@ export class DashboardComponent implements OnInit {
       currency: 'INR',
       maximumFractionDigits: 2,
     });
+  }
+
+  staffChartResults(rows: any[] | undefined | null): { name: string; value: number }[] {
+    return (rows || []).map((r: any) => ({
+      name: r.name,
+      value: Number(r.value),
+    }));
+  }
+
+  staffLineResults(rows: any[] | undefined | null): { name: string; series: { name: string; value: number }[] }[] {
+    const pts = this.staffChartResults(rows);
+    if (!pts.length) return [];
+    return [{ name: 'Sales', series: pts }];
   }
 
   showMsg(m: string): void {

@@ -46,4 +46,10 @@ public class DashboardSummaryDTO {
 
     /** Donut: transaction-type mix for last 30 days */
     private List<ChartPointDTO> activityDonutLast30Days;
+
+    /** Staff specific dashboard additions: last 12 months sales */
+    private List<ChartPointDTO> mySalesLast12Months;
+
+    /** Staff specific dashboard additions: last 30 days sales */
+    private List<ChartPointDTO> mySalesLast30Days;
 }

@@ -31,6 +31,59 @@
       <div class="kpi-sub">Total orders processed by you</div>
     </div>
   </div>
+  <!-- Staff Personalized Graphs -->
+  <div class="ref-staff-charts" *appHasRole="'STAFF'">
+    <section class="ims-card staff-chart-panel">
+      <div class="panel-head">
+        <h2 class="panel-h2">Monthly Sales Performance</h2>
+        <p class="panel-sub">Your sales revenue over the last 12 months</p>
+      </div>
+      <div class="chart-container">
+        <ngx-charts-area-chart
+          *ngIf="staffLineResults(summary?.mySalesLast12Months)?.length"
+          [view]="staffChartView"
+          [scheme]="chartScheme"
+          [results]="staffLineResults(summary?.mySalesLast12Months)"
+          [gradient]="true"
+          [xAxis]="true"
+          [yAxis]="true"
+          [legend]="false"
+          [showXAxisLabel]="true"
+          [showYAxisLabel]="true"
+          xAxisLabel="Month"
+          yAxisLabel="Revenue (₹)"
+          [animations]="animations">
+        </ngx-charts-area-chart>
+        <p *ngIf="!summary?.mySalesLast12Months?.length" class="panel-empty">No sales data for the last 12 months.</p>
+      </div>
+    </section>
+
+    <section class="ims-card staff-chart-panel">
+      <div class="panel-head">
+        <h2 class="panel-h2">Daily Sales Pulse</h2>
+        <p class="panel-sub">Your daily sales activity for the last 30 days</p>
+      </div>
+      <div class="chart-container">
+        <ngx-charts-bar-vertical
+          *ngIf="staffChartResults(summary?.mySalesLast30Days)?.length"
+          [view]="staffChartView"
+          [scheme]="chartScheme"
+          [results]="staffChartResults(summary?.mySalesLast30Days)"
+          [gradient]="true"
+          [xAxis]="true"
+          [yAxis]="true"
+          [legend]="false"
+          [showXAxisLabel]="true"
+          [showYAxisLabel]="true"
+          xAxisLabel="Day"
+          yAxisLabel="Sales (₹)"
+          [animations]="animations"
+          [roundEdges]="true">
+        </ngx-charts-bar-vertical>
+        <p *ngIf="!summary?.mySalesLast30Days?.length" class="panel-empty">No sales data for the last 30 days.</p>
+      </div>
+    </section>
+  </div>
 
   <app-insight-card-row *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER']"
     [cards]="summary?.insightCards"></app-insight-card-row>

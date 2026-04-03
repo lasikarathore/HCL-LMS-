@@ -27,7 +27,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.TextStyle;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import com.phegondev.InventoryManagementSystem.dto.ChartPointDTO;
+import java.sql.Date;
+import java.sql.Timestamp;
 
 @Service
 @RequiredArgsConstructor
@@ -126,6 +135,15 @@ public class DashboardServiceImpl implements DashboardService {
                 return t != null && !t.getUser().getId().equals(currentUser.getId());
             });
             summaryBuilder.recentTransactions(recentDtos);
+
+            // Fetch Staff Sales Graphs (last 12 months and last 30 days)
+            LocalDateTime twelveMonthsAgo = today.minusMonths(11).withDayOfMonth(1).atStartOfDay();
+            List<Object[]> monthlyRows = transactionRepository.sumSalesByUserIdLastMonths(currentUser.getId(), twelveMonthsAgo);
+            summaryBuilder.mySalesLast12Months(fillMonthlyGaps(monthlyRows, twelveMonthsAgo, 12));
+
+            LocalDateTime thirtyDaysAgo = today.minusDays(29).atStartOfDay();
+            List<Object[]> dailyRows = transactionRepository.sumSalesByUserIdLastDays(currentUser.getId(), thirtyDaysAgo);
+            summaryBuilder.mySalesLast30Days(fillDailyGaps(dailyRows, thirtyDaysAgo.toLocalDate(), 30));
         }
 
         DashboardSummaryDTO summary = summaryBuilder.build();
@@ -135,6 +153,38 @@ public class DashboardServiceImpl implements DashboardService {
                 .message("success")
                 .dashboardSummary(summary)
                 .build();
+    }
+
+    private List<ChartPointDTO> fillMonthlyGaps(List<Object[]> rows, LocalDateTime start, int months) {
+        Map<LocalDate, BigDecimal> dataMap = new HashMap<>();
+        for (Object[] row : rows) {
+            // DATE_TRUNC returns a Timestamp or Date
+            LocalDate d = row[0] instanceof Timestamp ? ((Timestamp) row[0]).toLocalDateTime().toLocalDate() 
+                         : ((java.util.Date) row[0]).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+            dataMap.put(d.withDayOfMonth(1), (BigDecimal) row[1]);
+        }
+        List<ChartPointDTO> result = new ArrayList<>();
+        for (int i = 0; i < months; i++) {
+            LocalDate current = start.plusMonths(i).toLocalDate().withDayOfMonth(1);
+            String label = current.getMonth().getDisplayName(TextStyle.SHORT, Locale.US) + " " + (current.getYear() % 100);
+            result.add(new ChartPointDTO(label, dataMap.getOrDefault(current, BigDecimal.ZERO)));
+        }
+        return result;
+    }
+
+    private List<ChartPointDTO> fillDailyGaps(List<Object[]> rows, LocalDate start, int days) {
+        Map<LocalDate, BigDecimal> dataMap = new HashMap<>();
+        for (Object[] row : rows) {
+            LocalDate d = row[0] instanceof Date ? ((Date) row[0]).toLocalDate() : (LocalDate) row[0];
+            dataMap.put(d, (BigDecimal) row[1]);
+        }
+        List<ChartPointDTO> result = new ArrayList<>();
+        for (int i = 0; i < days; i++) {
+            LocalDate current = start.plusDays(i);
+            String label = current.getDayOfMonth() + " " + current.getMonth().getDisplayName(TextStyle.SHORT, Locale.US);
+            result.add(new ChartPointDTO(label, dataMap.getOrDefault(current, BigDecimal.ZERO)));
+        }
+        return result;
     }
 
     private static BigDecimal nullToZero(BigDecimal v) {

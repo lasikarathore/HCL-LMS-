@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../service/api.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-sell',
@@ -11,7 +12,10 @@ import { ApiService } from '../service/api.service';
   styleUrl: './sell.component.css',
 })
 export class SellComponent implements OnInit {
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private route: ActivatedRoute
+  ) {}
 
   products: any[] = [];
   productId = '';
@@ -93,6 +97,14 @@ export class SellComponent implements OnInit {
       next: (res: any) => {
         if (res.status === 200) {
           this.products = res.products || [];
+          // Handle auto-select via query parameter
+          this.route.queryParams.subscribe(params => {
+            const pId = params['productId'];
+            if (pId) {
+              this.productId = pId;
+              this.onProductChange();
+            }
+          });
         }
       },
       error: (error) => {

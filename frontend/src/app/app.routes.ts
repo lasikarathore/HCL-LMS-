@@ -27,7 +27,7 @@ export const routes: Routes = [
   { path: 'edit-supplier/:supplierId', component: AddEditSupplierComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'PROCUREMENT_OFFICER'] } },
   { path: 'add-supplier', component: AddEditSupplierComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'PROCUREMENT_OFFICER'] } },
 
-  { path: 'product', component: ProductComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER'] } },
+  { path: 'product', component: ProductComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'STAFF'] } },
   { path: 'edit-product/:productId', component: AddEditProductComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER'] } },
   { path: 'add-product', component: AddEditProductComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER'] } },
 

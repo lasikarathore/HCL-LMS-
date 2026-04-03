@@ -100,6 +100,10 @@ export class ProductComponent implements OnInit {
     this.router.navigate([`/edit-product/${productId}`]);
   }
 
+  navigateToSellPage(productId: string): void {
+    this.router.navigate(['/sell'], { queryParams: { productId } });
+  }
+
   showMessage(message: string) {
     this.message = message;
     setTimeout(() => {

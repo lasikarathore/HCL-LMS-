@@ -129,4 +129,24 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
             @Param("userId") Long userId,
             @Param("type") TransactionType type,
             @Param("date") java.time.LocalDate date);
+
+    @Query(value = """
+            SELECT DATE_TRUNC('month', t.created_at) AS m,
+                   COALESCE(SUM(t.total_price), 0)
+            FROM transactions t
+            WHERE t.user_id = :userId AND t.transaction_type = 'SALE' AND t.created_at >= :since
+            GROUP BY 1
+            ORDER BY 1
+            """, nativeQuery = true)
+    List<Object[]> sumSalesByUserIdLastMonths(@Param("userId") Long userId, @Param("since") LocalDateTime since);
+
+    @Query(value = """
+            SELECT CAST(t.created_at AS date) AS d,
+                   COALESCE(SUM(t.total_price), 0)
+            FROM transactions t
+            WHERE t.user_id = :userId AND t.transaction_type = 'SALE' AND t.created_at >= :since
+            GROUP BY 1
+            ORDER BY 1
+            """, nativeQuery = true)
+    List<Object[]> sumSalesByUserIdLastDays(@Param("userId") Long userId, @Param("since") LocalDateTime since);
 }

@@ -43,6 +43,14 @@
         <div class="prod-actions">
           <button
             type="button"
+            class="ims-btn ims-btn-primary"
+            (click)="navigateToSellPage(product.id)"
+            *appHasRole="['ADMIN', 'STAFF']"
+          >
+            Sell Now
+          </button>
+          <button
+            type="button"
             class="ims-btn ims-btn-ghost"
             (click)="navigateToEditProductPage(product.id)"
             *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER']"
