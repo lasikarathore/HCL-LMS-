@@ -1,4 +1,4 @@
-# HCL Enterprise Inventory & Supply Chain Management System
+# Ecommerce Web-Based Inventory Management System
 
 A high-performance, real-time solution for managing complex inventory workflows, purchase orders, and supplier relationships with integrated business intelligence.
 
