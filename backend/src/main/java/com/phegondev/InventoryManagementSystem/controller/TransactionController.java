@@ -19,7 +19,7 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @GetMapping("/analytics")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER', 'STAFF')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_MANAGER', 'STAFF', 'ANALYST')")
     public ResponseEntity<Response> getTransactionAnalytics(
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year
@@ -44,7 +44,7 @@ public class TransactionController {
     }
 
     @GetMapping("/all")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'ANALYST')")
     public ResponseEntity<Response> getAllTransactions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -56,7 +56,7 @@ public class TransactionController {
     }
 
     @GetMapping("/by-month-year")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'ANALYST')")
     public ResponseEntity<Response> getAllTransactionByMonthAndYear(
             @RequestParam int month,
             @RequestParam int year
@@ -68,7 +68,7 @@ public class TransactionController {
      * Only numeric segments match — avoids "analytics", "all", etc. binding as {@code id}.
      */
     @GetMapping("/{id:\\d+}")
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'ANALYST')")
     public ResponseEntity<Response> getTransactionById(@PathVariable Long id) {
         return ResponseEntity.ok(transactionService.getTransactionById(id));
     }

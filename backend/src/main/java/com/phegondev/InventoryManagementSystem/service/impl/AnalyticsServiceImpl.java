@@ -1,11 +1,14 @@
 package com.phegondev.InventoryManagementSystem.service.impl;
 
-import com.phegondev.InventoryManagementSystem.dto.Response;
+import com.phegondev.InventoryManagementSystem.dto.*;
+import com.phegondev.InventoryManagementSystem.enums.TransactionType;
+import com.phegondev.InventoryManagementSystem.repository.PurchaseOrderRepository;
+import com.phegondev.InventoryManagementSystem.service.DashboardService;
+import com.phegondev.InventoryManagementSystem.service.AnalyticsService;
 import com.phegondev.InventoryManagementSystem.entity.Product;
 import com.phegondev.InventoryManagementSystem.repository.ProductRepository;
 import com.phegondev.InventoryManagementSystem.repository.SupplierMetricsRepository;
 import com.phegondev.InventoryManagementSystem.repository.TransactionRepository;
-import com.phegondev.InventoryManagementSystem.service.AnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +27,8 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private final TransactionRepository transactionRepository;
     private final ProductRepository productRepository;
     private final SupplierMetricsRepository supplierMetricsRepository;
+    private final PurchaseOrderRepository purchaseOrderRepository;
+    private final DashboardService dashboardService;
 
     private static LocalDateTime[] rangeToWindow(String range) {
         LocalDate today = LocalDate.now();
@@ -193,7 +198,135 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                 .build();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Response getBiSummary() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime yearStart = now.toLocalDate().withDayOfYear(1).atStartOfDay();
+        LocalDateTime lastYearStart = yearStart.minusYears(1);
+        LocalDateTime lastYearUntil = now.minusYears(1);
+
+        // 1. Financial KPIs (Current vs Previous Comparison)
+        BigDecimal ytdRevenue = transactionRepository.sumTotalPriceByTypeAndSince(TransactionType.SALE, yearStart);
+        BigDecimal lytdRevenue = transactionRepository.sumTotalPriceByTypeBetween(TransactionType.SALE, lastYearStart, lastYearUntil);
+        
+        // Financial KPIs: Use actual margins from historical data
+        BigDecimal ytdCogs = BigDecimal.ZERO;
+        List<Product> allProducts = productRepository.findAll();
+        for (Product p : allProducts) {
+            long sold = transactionRepository.aggregateUnitsSoldForProductInPeriod(p.getId(), TransactionType.SALE, yearStart);
+            BigDecimal costPrice = purchaseOrderRepository.findLatestPurchasePrice(p.getId());
+            if (costPrice == null) costPrice = p.getPrice().multiply(BigDecimal.valueOf(0.6)); // fallback if never purchased
+            ytdCogs = ytdCogs.add(BigDecimal.valueOf(sold).multiply(costPrice));
+        }
+
+        BigDecimal avgMargin = ytdRevenue.signum() == 0 ? BigDecimal.valueOf(0.3) : 
+            ytdRevenue.subtract(ytdCogs).divide(ytdRevenue, 4, java.math.RoundingMode.HALF_UP);
+        
+        BigDecimal lytdCogs = lytdRevenue.multiply(BigDecimal.ONE.subtract(avgMargin));
+        
+        BigDecimal ytdProfit = ytdRevenue.subtract(ytdCogs);
+        BigDecimal lytdProfit = lytdRevenue.subtract(lytdCogs);
+
+        double netMargin = ytdRevenue.signum() == 0 ? 0.0 : 
+            ytdProfit.multiply(BigDecimal.valueOf(100)).divide(ytdRevenue, 2, java.math.RoundingMode.HALF_UP).doubleValue();
+
+        List<BiFinancialKpiDTO> financialStats = List.of(
+            new BiFinancialKpiDTO("YTD Revenue", formatMoney(ytdRevenue), calculateTrend(ytdRevenue, lytdRevenue), trendClass(ytdRevenue, lytdRevenue)),
+            new BiFinancialKpiDTO("Gross Profit", formatMoney(ytdProfit), calculateTrend(ytdProfit, lytdProfit), trendClass(ytdProfit, lytdProfit)),
+            new BiFinancialKpiDTO("COGS", formatMoney(ytdCogs), calculateTrend(ytdCogs, lytdCogs), trendClassInv(ytdCogs, lytdCogs)),
+            new BiFinancialKpiDTO("Net Margin", netMargin + "%", "Real-time", "trend-up")
+        );
+
+        // 2. Supply Chain Metrics
+        Double leadTime = purchaseOrderRepository.avgLeadTimeDays();
+        double otif = supplierMetricsRepository.avgOnTime();
+        
+        // Stock Turnover = Total Units Sold YTD / Average Stock
+        long unitsSoldYtd = 0;
+        for (Product p : allProducts) {
+            unitsSoldYtd += transactionRepository.aggregateUnitsSoldForProductInPeriod(p.getId(), TransactionType.SALE, yearStart);
+        }
+        long currentStock = allProducts.stream().mapToLong(p -> p.getStockQuantity() == null ? 0 : p.getStockQuantity()).sum();
+        double turnover = currentStock == 0 ? 0 : (double) unitsSoldYtd / (double) Math.max(1, currentStock / 2.0);
+        turnover = Math.round(turnover * 10.0) / 10.0;
+
+        List<BiSupplyChainStatDTO> supplyChainStats = List.of(
+            new BiSupplyChainStatDTO("Otif Rate", String.format("%.1f%%", otif), "On-time In-full"),
+            new BiSupplyChainStatDTO("Lead Time", String.format("%.1f Days", leadTime != null ? leadTime : 0.0), "Avg. Fulfillment"),
+            new BiSupplyChainStatDTO("Stock Turnover", turnover + "x", "Annualized"),
+            new BiSupplyChainStatDTO("Supplier Risk", supplierMetricsRepository.avgRating() > 3.5 ? "Low" : "Elevated", "Weighted Average")
+        );
+
+        // 3. Financial Trend Data (Revenue vs Profit)
+        List<Map<String, Object>> trendRaw = (List<Map<String, Object>>) summary("THIS_YEAR").getTrend();
+        List<com.phegondev.InventoryManagementSystem.dto.ChartSeriesGroupDTO> financialTrendData = new ArrayList<>();
+        
+        List<com.phegondev.InventoryManagementSystem.dto.ChartPointDTO> revenueSeries = new ArrayList<>();
+        List<com.phegondev.InventoryManagementSystem.dto.ChartPointDTO> profitSeries = new ArrayList<>();
+
+        if (trendRaw != null) {
+            for (Map<String, Object> m : trendRaw) {
+                String name = (String) m.get("name");
+                BigDecimal sales = (BigDecimal) m.get("sales");
+                // profit = sales * current calculated avg margin for real-time consistency
+                BigDecimal profit = sales.multiply(avgMargin); 
+                revenueSeries.add(new com.phegondev.InventoryManagementSystem.dto.ChartPointDTO(name, sales));
+                profitSeries.add(new com.phegondev.InventoryManagementSystem.dto.ChartPointDTO(name, profit));
+            }
+        }
+        
+        financialTrendData.add(new com.phegondev.InventoryManagementSystem.dto.ChartSeriesGroupDTO("Revenue", revenueSeries));
+        financialTrendData.add(new com.phegondev.InventoryManagementSystem.dto.ChartSeriesGroupDTO("Profit", profitSeries));
+
+        // 4. Inventory Mix Data (Category split)
+        List<com.phegondev.InventoryManagementSystem.dto.ChartPointDTO> inventoryMixData = new ArrayList<>();
+        List<Map<String, Object>> catRaw = (List<Map<String, Object>>) summary("THIS_YEAR").getAnalyticsCategories();
+        if (catRaw != null) {
+            for (Map<String, Object> m : catRaw) {
+                inventoryMixData.add(new com.phegondev.InventoryManagementSystem.dto.ChartPointDTO((String) m.get("category"), (BigDecimal) m.get("revenue")));
+            }
+        }
+
+        // 5. Ledger Data (Recent Transactions)
+        Response dashRes = dashboardService.getSummary();
+        List<TransactionDTO> ledgerData = dashRes.getDashboardSummary().getRecentTransactions();
+
+        BiAnalyticsDTO biData = BiAnalyticsDTO.builder()
+            .financialStats(financialStats)
+            .supplyChainStats(supplyChainStats)
+            .financialTrendData(financialTrendData)
+            .inventoryMixData(inventoryMixData)
+            .ledgerData(ledgerData)
+            .build();
+
+        return Response.builder()
+            .status(200)
+            .message("success")
+            .biAnalytics(biData)
+            .build();
+    }
+
     private String formatMoney(BigDecimal val) {
+        if (val == null) val = BigDecimal.ZERO;
         return "₹" + String.format("%,.0f", val);
+    }
+
+    private String calculateTrend(BigDecimal current, BigDecimal previous) {
+        if (previous == null || previous.signum() == 0) return "N/A";
+        BigDecimal diff = current.subtract(previous);
+        double pct = diff.multiply(BigDecimal.valueOf(100)).divide(previous, 1, java.math.RoundingMode.HALF_UP).doubleValue();
+        return (pct >= 0 ? "+" : "") + pct + "%";
+    }
+
+    private String trendClass(BigDecimal current, BigDecimal previous) {
+        if (previous == null || previous.signum() == 0) return "trend-neutral";
+        return current.compareTo(previous) >= 0 ? "trend-up" : "trend-down";
+    }
+
+    private String trendClassInv(BigDecimal current, BigDecimal previous) {
+        if (previous == null || previous.signum() == 0) return "trend-neutral";
+        // For COGS, higher is technically "down" (bad)
+        return current.compareTo(previous) <= 0 ? "trend-up" : "trend-down";
     }
 }

@@ -50,7 +50,8 @@ public class User {
     private List<Transaction> transactions;
 
     @Column(name = "created_at")
-    private final LocalDateTime createdAt = LocalDateTime.now();
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Override
     public String toString() {

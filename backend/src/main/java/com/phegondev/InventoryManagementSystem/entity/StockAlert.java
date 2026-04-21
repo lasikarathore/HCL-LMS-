@@ -39,6 +39,7 @@ public class StockAlert {
 
     private LocalDateTime updatedAt;
 
-    private final LocalDateTime createdAt = LocalDateTime.now();
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 }
 

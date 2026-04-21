@@ -391,6 +391,12 @@ export class ApiService {
     });
   }
 
+  getBiSummary(): Observable<any> {
+    return this.http.get(`${ApiService.BASE_URL}/analytics/bi-summary`, {
+      headers: this.getHeader(),
+    });
+  }
+
 
 
 

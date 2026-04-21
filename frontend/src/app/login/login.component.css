@@ -90,7 +90,16 @@
     grid-template-columns: 1fr;
   }
   .auth-visual {
-    min-height: 200px;
-    padding: 32px 24px;
+    padding: 40px 24px;
+    text-align: center;
+  }
+  .auth-logo {
+    font-size: 2rem;
+  }
+  .auth-visual h1 {
+    font-size: 1.4rem;
+  }
+  .auth-panel {
+    padding: 30px 16px;
   }
 }

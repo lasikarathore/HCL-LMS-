@@ -25,6 +25,7 @@ public class Supplier {
 
     private String address;
 
+    @Builder.Default
     @Column(name = "status")
     private String status = "ACTIVE";
 }

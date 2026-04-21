@@ -255,6 +255,40 @@ h1, h2, h3, .ims-font-display {
   animation: ims-spin 1s linear infinite;
 }
 
+/* Responsive Utilities */
+.ims-table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--ims-radius);
+  border: 1px solid var(--ims-border);
+  background: #fff;
+}
+
+.ims-mobile-only {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .ims-page-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .ims-mobile-only {
+    display: block;
+  }
+
+  .ims-desktop-only {
+    display: none;
+  }
+
+  .ims-page-title {
+    font-size: 1.4rem;
+  }
+}
+
 @keyframes ims-spin {
   to { transform: rotate(360deg); }
 }

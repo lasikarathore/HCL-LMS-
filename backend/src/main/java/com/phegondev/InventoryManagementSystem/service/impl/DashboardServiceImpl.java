@@ -101,7 +101,7 @@ public class DashboardServiceImpl implements DashboardService {
         DashboardSummaryDTO.DashboardSummaryDTOBuilder summaryBuilder = DashboardSummaryDTO.builder()
                 .lowStockThreshold(lowStockThreshold);
 
-        if (role == UserRole.ADMIN || role == UserRole.WAREHOUSE_MANAGER || role == UserRole.PROCUREMENT_OFFICER) {
+        if (role == UserRole.ADMIN || role == UserRole.WAREHOUSE_MANAGER || role == UserRole.PROCUREMENT_OFFICER || role == UserRole.ANALYST) {
             summaryBuilder.inventoryValue(inventoryValue)
                     .lowStockProductCount(productRepository.countByStockQuantityLessThan(lowStockThreshold))
                     .lowStockProducts(lowStockProducts)

@@ -16,6 +16,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { StockAlertsComponent } from './stock-alerts/stock-alerts.component';
 import { PurchaseOrdersComponent } from './purchase-orders/purchase-orders.component';
 import { AnalyticsComponent } from './analytics/analytics.component';
+import { BiDashboardComponent } from './bi-dashboard/bi-dashboard.component';
 
 export const routes: Routes = [
 
@@ -27,7 +28,7 @@ export const routes: Routes = [
   { path: 'edit-supplier/:supplierId', component: AddEditSupplierComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'PROCUREMENT_OFFICER'] } },
   { path: 'add-supplier', component: AddEditSupplierComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'PROCUREMENT_OFFICER'] } },
 
-  { path: 'product', component: ProductComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'STAFF'] } },
+  { path: 'product', component: ProductComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'STAFF', 'ANALYST'] } },
   { path: 'edit-product/:productId', component: AddEditProductComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER'] } },
   { path: 'add-product', component: AddEditProductComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER'] } },
 
@@ -35,13 +36,14 @@ export const routes: Routes = [
   { path: 'purchase', component: PurchaseComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER'] } },
   { path: 'sell', component: SellComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'STAFF'] } },
 
-  { path: 'transaction', component: TransactionComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER'] } },
-  { path: 'transaction/:transactionId', component: TransactionDetailsComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER'] } },
+  { path: 'transaction', component: TransactionComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'ANALYST'] } },
+  { path: 'transaction/:transactionId', component: TransactionDetailsComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'ANALYST'] } },
 
   { path: 'profile', component: ProfileComponent, canActivate: [GuardService] },
   { path: 'dashboard', component: DashboardComponent, canActivate: [GuardService] },
   { path: 'stock-alerts', component: StockAlertsComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER'] } },
-  { path: 'analytics', component: AnalyticsComponent, canActivate: [GuardService], data: { roles: ['ADMIN'] } },
+  { path: 'analytics', component: AnalyticsComponent, canActivate: [GuardService], data: { roles: ['ADMIN', 'ANALYST'] } },
+  { path: 'bi-dashboard', component: BiDashboardComponent, canActivate: [GuardService] },
 
   //   WIDE CARD
   { path: "", redirectTo: "/login", pathMatch: 'full' },

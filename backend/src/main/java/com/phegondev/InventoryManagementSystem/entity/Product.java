@@ -44,7 +44,8 @@ public class Product {
 
     private LocalDateTime updatedAt;
 
-    private final LocalDateTime createdAt = LocalDateTime.now();
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "category_id")

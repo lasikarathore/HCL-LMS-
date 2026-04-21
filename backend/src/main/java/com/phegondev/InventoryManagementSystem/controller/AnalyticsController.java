@@ -18,8 +18,14 @@ public class AnalyticsController {
     private final AnalyticsService analyticsService;
 
     @GetMapping("/summary")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'ANALYST')")
     public ResponseEntity<Response> summary(@RequestParam(required = false, defaultValue = "THIS_MONTH") String range) {
         return ResponseEntity.ok(analyticsService.summary(range));
+    }
+
+    @GetMapping("/bi-summary")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'ANALYST')")
+    public ResponseEntity<Response> getBiSummary() {
+        return ResponseEntity.ok(analyticsService.getBiSummary());
     }
 }

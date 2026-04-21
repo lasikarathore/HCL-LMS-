@@ -1,0 +1,348 @@
+.bi-container {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+    color: var(--ims-text-main);
+  }
+  
+  .bi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 32px;
+  }
+  
+  .bi-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  
+  .bi-subtitle {
+    color: var(--ims-text-muted);
+    font-size: 14px;
+  }
+  
+  .header-right {
+    display: flex;
+    gap: 16px;
+  }
+  
+  .bi-filters {
+    display: flex;
+    background: var(--ims-bg-card);
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid var(--ims-border);
+  }
+  
+  .bi-filters button {
+    padding: 6px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--ims-text-muted);
+    transition: all 0.2s;
+  }
+  
+  .bi-filters button.active {
+    background: var(--ims-accent);
+    color: white;
+  }
+  
+  .bi-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .export-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--ims-bg-card);
+    border: 1px solid var(--ims-border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .export-btn:hover:not(:disabled) {
+    background: var(--ims-bg-hover);
+    border-color: var(--ims-accent);
+  }
+  
+  .export-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .bi-section {
+    margin-bottom: 40px;
+  }
+  
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--ims-border);
+  }
+  
+  /* Cards */
+  .bi-card {
+    background: var(--ims-bg-card);
+    border: 1px solid var(--ims-border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* KPI Grid */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+  
+  .kpi-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .kpi-label {
+    font-size: 13px;
+    color: var(--ims-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .kpi-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ims-text-main);
+  }
+  
+  .kpi-trend {
+    font-size: 12px;
+    font-weight: 600;
+  }
+  
+  .trend-up { color: #10b981; }
+  .trend-down { color: #ef4444; }
+  
+  /* Analytics Row */
+  .analytics-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+  
+  .chart-card {
+    height: 380px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .card-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  
+  .chart-container {
+    flex: 1;
+    min-height: 0;
+  }
+  
+  /* Metric Grid */
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  
+  .metric-card {
+    text-align: center;
+  }
+  
+  .metric-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ims-accent);
+    margin-bottom: 4px;
+  }
+  
+  .metric-label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  
+  .metric-sub {
+    font-size: 12px;
+    color: var(--ims-text-muted);
+  }
+  
+  /* Ledger Table */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .view-all {
+    font-size: 13px;
+    color: var(--ims-accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .ledger-table-card {
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  .ledger-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  
+  .ledger-table th {
+    text-align: left;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.02);
+    color: var(--ims-text-muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--ims-border);
+  }
+  
+  .ledger-table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--ims-border);
+  }
+  
+  .tx-id {
+    font-family: monospace;
+    font-weight: 600;
+    color: var(--ims-accent);
+  }
+  
+  .type-pill {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 10px;
+  }
+  
+  .type-pill[data-type="SALE"] { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+  .type-pill[data-type="PURCHASE"] { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+  .type-pill[data-type="ADJUSTMENT"] { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+  
+  .amount {
+    font-weight: 600;
+    text-align: right;
+  }
+  
+  .amount.negative { color: #ef4444; }
+  
+  .status-pill {
+    font-size: 11px;
+    color: var(--ims-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .status-pill::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+  }
+  
+  @media (max-width: 1024px) {
+    .analytics-row {
+      grid-template-columns: 1fr;
+    }
+    
+    .chart-card {
+      height: 320px;
+    }
+  }
+
+@media print {
+  /* Hide sidebars and nav */
+  :host-context(app-root) .sidebar,
+  :host-context(app-root) .navbar,
+  .bi-actions,
+  .view-all {
+    display: none !important;
+  }
+
+  .bi-container {
+    padding: 20px !important;
+    background: white !important;
+    color: black !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .bi-card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #eee !important;
+    background: #fff !important;
+    color: #333 !important;
+    margin-bottom: 20px !important;
+  }
+
+  .kpi-card {
+    border-bottom: 3px solid #3366ff !important;
+  }
+
+  .section-title {
+    color: #333 !important;
+    margin-top: 30px !important;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  #bi-dashboard-root, #bi-dashboard-root * {
+    visibility: visible;
+  }
+
+  #bi-dashboard-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  ngx-charts {
+    filter: none !important;
+  }
+}

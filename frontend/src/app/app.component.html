@@ -1,6 +1,7 @@
 <ng-container *ngIf="shellVisible; else authLayout">
   <div class="ims-app-shell">
-    <aside class="ims-sidebar">
+    <div class="ims-sidebar-backdrop" *ngIf="sidebarActive" (click)="closeSidebar()"></div>
+    <aside class="ims-sidebar" [class.active]="sidebarActive">
       <div class="ims-sidebar-brand">
         <span class="ims-logo">IMS</span>
         <span class="ims-logo-tag">Inventory</span>
@@ -8,7 +9,7 @@
       <nav class="ims-nav">
         <div class="ims-nav-section">OVERVIEW</div>
         <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }"
-          *appHasRole="['ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER']">
+          *appHasRole="['ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'ANALYST']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <rect width="7" height="7" x="3" y="3" rx="1" />
@@ -19,7 +20,7 @@
           <span>Dashboard</span>
         </a>
         <a routerLink="/transaction" routerLinkActive="active"
-          *appHasRole="['ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER']">
+          *appHasRole="['ADMIN', 'STAFF', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'ANALYST']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <path d="m2 8 2 2 2-2" />
@@ -39,10 +40,9 @@
             <path d="M13.73 21a2 2 0 0 1-3.46 0" />
           </svg>
           <span>Stock Alerts</span>
-          <span class="ims-badge" *ngIf="activeAlertCount > 0">{{ activeAlertCount }}</span>
         </a>
         <a routerLink="/product" routerLinkActive="active" class="ims-nav-item"
-          *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'STAFF']">
+          *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'STAFF', 'ANALYST']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <path d="m7.5 4.27 9 5.15" />
@@ -52,7 +52,20 @@
             <path d="M12 22V12" />
           </svg>
           <span>Products</span>
-          <span class="ims-badge" *ngIf="lowStockCount > 0">{{ lowStockCount }}</span>
+        </a>
+
+        <div class="ims-nav-section" *appHasRole="['ADMIN', 'ANALYST']">ANALYST VIEW</div>
+        <a routerLink="/bi-dashboard" routerLinkActive="active" class="ims-nav-item" *appHasRole="['ADMIN', 'ANALYST']">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
+            <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7" />
+            <path d="M3 11l5 5 5-5" />
+            <path d="M8 16V8" />
+            <circle cx="18" cy="18" r="3" />
+            <path d="M18 15v3" />
+          </svg>
+          <span>BI Dashboard</span>
+          <span class="ims-badge ims-badge-new">NEW</span>
         </a>
         <a routerLink="/category" routerLinkActive="active" *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -107,8 +120,8 @@
           <span>Sell</span>
         </a>
 
-        <div class="ims-nav-section" *appHasRole="['ADMIN']">ANALYTICS</div>
-        <a routerLink="/analytics" routerLinkActive="active" class="ims-nav-item" *appHasRole="['ADMIN']">
+        <div class="ims-nav-section" *appHasRole="['ADMIN', 'ANALYST']">ANALYTICS</div>
+        <a routerLink="/analytics" routerLinkActive="active" class="ims-nav-item" *appHasRole="['ADMIN', 'ANALYST']">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ims-nav-icon">
             <path d="M3 3v18h18" />
@@ -144,6 +157,14 @@
     <main class="ims-main">
       <div class="ims-topbar">
         <div class="ims-topbar-left">
+          <button class="ims-hamburger" (click)="toggleSidebar()" aria-label="Toggle Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
           <!-- Main search functionality removed -->
         </div>
         <div class="ims-topbar-right">

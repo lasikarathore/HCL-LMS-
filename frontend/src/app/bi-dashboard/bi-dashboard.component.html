@@ -1,0 +1,112 @@
+<div class="bi-container" id="bi-dashboard-root">
+  <!-- Header with Filters & Actions -->
+  <header class="bi-header">
+    <div class="header-left">
+      <h1 class="bi-title">Analytical Intelligence</h1>
+      <p class="bi-subtitle">Detailed business performance and supply chain analytics (Live YTD)</p>
+    </div>
+    <div class="header-right">
+      <div class="bi-actions">
+        <button class="export-btn" (click)="exportData('CSV')" [disabled]="isExporting">
+           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+           CSV
+        </button>
+        <button class="export-btn" (click)="exportData('PDF')" [disabled]="isExporting">
+           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+           PDF
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Financial KPI Grid -->
+  <section class="bi-section">
+    <h2 class="section-title">Financial Performance</h2>
+    <div class="kpi-grid">
+      <div class="bi-card kpi-card" *ngFor="let stat of financialStats">
+        <div class="kpi-label">{{ stat.label }}</div>
+        <div class="kpi-value">{{ stat.value }}</div>
+        <div class="kpi-trend" [ngClass]="stat.trendClass">{{ stat.trend }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Analytics Row -->
+  <div class="analytics-row">
+    <!-- Revenue Trend -->
+    <div class="bi-card chart-card main-chart">
+      <h3 class="card-title">Revenue vs Profit Trend</h3>
+      <div class="chart-container">
+        <ngx-charts-area-chart
+          [scheme]="colorScheme"
+          [results]="financialTrendData"
+          [gradient]="true"
+          [xAxis]="true"
+          [yAxis]="true"
+          [legend]="true"
+          [showXAxisLabel]="false"
+          [showYAxisLabel]="false"
+          [autoScale]="true">
+        </ngx-charts-area-chart>
+      </div>
+    </div>
+
+    <!-- Inventory Valuation -->
+    <div class="bi-card chart-card side-chart">
+      <h3 class="card-title">Inventory Exposure</h3>
+      <div class="chart-container">
+        <ngx-charts-pie-chart
+          [scheme]="colorScheme"
+          [results]="inventoryMixData"
+          [legend]="false"
+          [labels]="true"
+          [doughnut]="true">
+        </ngx-charts-pie-chart>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supply Chain Section -->
+  <section class="bi-section">
+    <h2 class="section-title">Supply Chain Health</h2>
+    <div class="metric-grid">
+      <div class="bi-card metric-card" *ngFor="let metric of supplyChainStats">
+        <div class="metric-value">{{ metric.value }}</div>
+        <div class="metric-label">{{ metric.label }}</div>
+        <div class="metric-sub">{{ metric.sub }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Historical Ledger -->
+  <section class="bi-section">
+    <div class="section-header">
+      <h2 class="section-title">Historical Ledger Data</h2>
+      <a class="view-all">View Full Audit Log</a>
+    </div>
+    <div class="bi-card ledger-table-card ims-table-container">
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th>Tx ID</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Entity</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of ledgerData">
+            <td><span class="tx-id">{{ row.id }}</span></td>
+            <td>{{ row.date }}</td>
+            <td><span class="type-pill" [attr.data-type]="row.type">{{ row.type }}</span></td>
+            <td>{{ row.entity }}</td>
+            <td class="amount" [class.negative]="row.amount < 0">{{ row.amount | currency:'INR' }}</td>
+            <td><span class="status-pill">{{ row.status }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

@@ -85,11 +85,11 @@
     </section>
   </div>
 
-  <app-insight-card-row *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER']"
+  <app-insight-card-row *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'ANALYST']"
     [cards]="summary?.insightCards"></app-insight-card-row>
 
   <div class="ref-main-split" *ngIf="summary">
-    <section class="ref-chart-panel ims-card" *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER']">
+    <section class="ref-chart-panel ims-card" *appHasRole="['ADMIN', 'WAREHOUSE_MANAGER', 'PROCUREMENT_OFFICER', 'ANALYST']">
       <div class="ref-panel-head">
         <div>
           <h2 class="panel-h2">Inventory process</h2>
@@ -115,7 +115,7 @@
       </p>
     </section>
 
-    <aside class="ref-dark-stack" *appHasRole="['ADMIN']">
+    <aside class="ref-dark-stack" *appHasRole="['ADMIN', 'ANALYST']">
       <div class="ref-dark-card">
         <h3 class="dark-title">Category share</h3>
         <p class="dark-sub">By inventory valuation</p>
@@ -155,7 +155,7 @@
         {{ summary.recentTransactions.length }} latest
       </span>
     </div>
-    <div class="ref-table-wrap" *ngIf="summary.recentTransactions?.length">
+    <div class="ims-table-container" *ngIf="summary.recentTransactions?.length">
       <table class="ref-table">
         <thead>
           <tr>

@@ -13,61 +13,31 @@
       <form (ngSubmit)="handleSubmit()" class="auth-form">
         <div>
           <label class="ims-label" for="reg-name">Full name</label>
-          <input
-            id="reg-name"
-            class="ims-input"
-            type="text"
-            [(ngModel)]="formData.name"
-            name="name"
-            required
-          />
+          <input id="reg-name" class="ims-input" type="text" [(ngModel)]="formData.name" name="name" required />
         </div>
         <div>
           <label class="ims-label" for="reg-email">Email</label>
-          <input
-            id="reg-email"
-            class="ims-input"
-            type="email"
-            [(ngModel)]="formData.email"
-            name="email"
-            required
-          />
+          <input id="reg-email" class="ims-input" type="email" [(ngModel)]="formData.email" name="email" required />
         </div>
         <div>
           <label class="ims-label" for="reg-phone">Phone</label>
-          <input
-            id="reg-phone"
-            class="ims-input"
-            type="text"
-            [(ngModel)]="formData.phoneNumber"
-            name="phoneNumber"
-            required
-          />
+          <input id="reg-phone" class="ims-input" type="text" [(ngModel)]="formData.phoneNumber" name="phoneNumber"
+            required />
         </div>
         <div>
           <label class="ims-label" for="reg-role">Role</label>
-          <select
-            id="reg-role"
-            class="ims-select"
-            [(ngModel)]="formData.role"
-            name="role"
-          >
+          <select id="reg-role" class="ims-select" [(ngModel)]="formData.role" name="role">
             <option value="ADMIN">Admin</option>
             <option value="PROCUREMENT_OFFICER">Procurement Officer</option>
             <option value="WAREHOUSE_MANAGER">Warehouse Manager</option>
             <option value="STAFF">Staff</option>
+            <option value="ANALYST">Business Analyst</option>
           </select>
         </div>
         <div>
           <label class="ims-label" for="reg-pass">Password</label>
-          <input
-            id="reg-pass"
-            class="ims-input"
-            type="password"
-            [(ngModel)]="formData.password"
-            name="password"
-            required
-          />
+          <input id="reg-pass" class="ims-input" type="password" [(ngModel)]="formData.password" name="password"
+            required />
         </div>
         <button type="submit" class="ims-btn ims-btn-primary auth-submit">
           Create account

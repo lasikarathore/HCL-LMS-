@@ -388,4 +388,10 @@
   .staff-chart-panel .chart-container {
     height: 300px;
   }
+  .ref-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+  .ref-greet {
+    font-size: 13px;
+  }
 }

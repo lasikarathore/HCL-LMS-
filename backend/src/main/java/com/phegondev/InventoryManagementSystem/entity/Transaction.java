@@ -1,6 +1,5 @@
 package com.phegondev.InventoryManagementSystem.entity;
 
-import com.phegondev.InventoryManagementSystem.converter.TransactionStatusBytesConverter;
 import com.phegondev.InventoryManagementSystem.enums.TransactionStatus;
 import com.phegondev.InventoryManagementSystem.enums.TransactionType;
 import jakarta.persistence.*;
@@ -31,7 +30,7 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private TransactionType transactionType;
 
-    @Convert(converter = TransactionStatusBytesConverter.class)
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private TransactionStatus status;
 
@@ -39,7 +38,8 @@ public class Transaction {
 
     private LocalDateTime updatedAt;
 
-    private final LocalDateTime createdAt = LocalDateTime.now();
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

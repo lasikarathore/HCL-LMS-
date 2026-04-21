@@ -41,6 +41,7 @@ public class Response {
     private List<TransactionDTO> transactions;
 
     private DashboardSummaryDTO dashboardSummary;
+    private BiAnalyticsDTO biAnalytics;
 
     private TransactionAnalyticsDTO transactionAnalytics;
 

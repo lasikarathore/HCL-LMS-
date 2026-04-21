@@ -30,6 +30,7 @@ export class AppComponent implements OnInit, OnDestroy {
   lowStockCount: number = 0;
   activeAlertCount: number = 0;
   poPendingCount: number = 0;
+  sidebarActive: boolean = false;
   private sub?: Subscription;
   private alertPollHandle?: ReturnType<typeof setInterval>;
 
@@ -42,7 +43,10 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.sub = this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))
-      .subscribe(() => this.refreshShell());
+      .subscribe(() => {
+        this.refreshShell();
+        this.closeSidebar();
+      });
     this.refreshShell();
   }
 
@@ -123,6 +127,16 @@ export class AppComponent implements OnInit, OnDestroy {
     this.apiService.logout();
     this.router.navigate(['/login']);
     this.refreshShell();
+    this.cdr.detectChanges();
+  }
+
+  toggleSidebar(): void {
+    this.sidebarActive = !this.sidebarActive;
+    this.cdr.detectChanges();
+  }
+
+  closeSidebar(): void {
+    this.sidebarActive = false;
     this.cdr.detectChanges();
   }
 }

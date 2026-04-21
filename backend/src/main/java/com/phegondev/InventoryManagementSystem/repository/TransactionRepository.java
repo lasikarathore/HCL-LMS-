@@ -59,6 +59,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     @Query("SELECT t.transactionType, COALESCE(SUM(t.totalPrice), 0) FROM Transaction t WHERE t.createdAt >= :since GROUP BY t.transactionType")
     List<Object[]> sumByTypeSince(@Param("since") LocalDateTime since);
 
+    @Query("SELECT COALESCE(SUM(t.totalPrice), 0) FROM Transaction t WHERE t.transactionType = :type AND t.createdAt >= :since")
+    BigDecimal sumTotalPriceByTypeAndSince(@Param("type") TransactionType type, @Param("since") LocalDateTime since);
+
+    @Query("SELECT COALESCE(SUM(t.totalPrice), 0) FROM Transaction t WHERE t.transactionType = :type AND t.createdAt >= :start AND t.createdAt < :end")
+    BigDecimal sumTotalPriceByTypeBetween(@Param("type") TransactionType type, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT COALESCE(SUM(t.totalProducts), 0) FROM Transaction t WHERE t.product.id = :productId AND t.transactionType = :type AND t.createdAt >= :since")
+    long aggregateUnitsSoldForProductInPeriod(@Param("productId") Long productId, @Param("type") TransactionType type, @Param("since") LocalDateTime since);
+
     @Query(value = """
             SELECT p.name, COALESCE(SUM(t.total_price), 0)
             FROM transactions t
